@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Extend the POS Config Form View -->
+        <record id="view_pos_config_form_extension" model="ir.ui.view">
+            <field name="name">pos.config.form.extension</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+            <field name="arch" type="xml">
+                <!-- Example: Add a new field under the settings tab -->
+                <xpath expr="//div[@id='title']" position="after">
+                <div class="row">
+                    <label for="registrierkasse_aes_key" string="AES Schlüssel für Umsatzzähler" class="col-lg-4 o_light_label" />
+                    <field name="registrierkasse_aes_key" />
+                </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

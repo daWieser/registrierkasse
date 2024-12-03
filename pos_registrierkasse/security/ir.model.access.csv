@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pos_registrierkasse_pos_registrierkasse,pos_registrierkasse.pos_registrierkasse,model_pos_registrierkasse_pos_registrierkasse,base.group_user,1,1,1,1
