@@ -17,6 +17,7 @@ patch(PaymentScreen.prototype, {
         this.currentOrder.prev_order_signature = signature.prev_order_signature
         this.currentOrder.order_signature = signature.order_signature
         this.currentOrder.encrypted_revenue = signature.encrypted_revenue
+        this.currentOrder.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
 
         console.log(signature)
 

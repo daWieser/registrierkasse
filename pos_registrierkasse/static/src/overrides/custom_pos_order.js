@@ -77,6 +77,7 @@ patch(Order.prototype, {
         this.certificate_serial_number = json.certificate_serial_number;
         this.prev_order_signature = json.prev_order_signature;
         this.order_signature = json.order_signature;
+        this.registrierkasse_receipt_number = json.registrierkasse_receipt_number;
     },
 
     export_as_JSON() {
@@ -85,6 +86,7 @@ patch(Order.prototype, {
         json.certificate_serial_number = this.certificate_serial_number;
         json.prev_order_signature = this.prev_order_signature;
         json.order_signature = this.order_signature;
+        json.registrierkasse_receipt_number = this.registrierkasse_receipt_number;
         return json
     }
 

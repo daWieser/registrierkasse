@@ -13,6 +13,17 @@
                     <label for="registrierkasse_aes_key" string="AES Schlüssel für Umsatzzähler" class="col-lg-4 o_light_label" />
                     <field name="registrierkasse_aes_key" />
                 </div>
+                <div class="row">
+                    <label for="a_trust_user_name" string="A Trust User" class="col-lg-4 o_light_label" />
+                    <field name="a_trust_user_name" />
+
+                    <label for="a_trust_password" string="A Trust Password" class="col-lg-4 o_light_label" />
+                    <field name="a_trust_password" />
+                </div>
+                <div class="row">
+                    <label for="certificate_serial_number" string="A certificate serial number" class="col-lg-4 o_light_label" />
+                    <field name="certificate_serial_number" />
+                </div>
                 </xpath>
             </field>
         </record>
