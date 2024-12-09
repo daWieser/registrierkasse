@@ -84,7 +84,7 @@ class CustomPOSConfig(models.Model):
         pos_config.a_trust_session_id = a_trust_session.sessionId
         pos_config.a_trust_session_key = a_trust_session.sessionKey
 
-        order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0,
+        order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0, 0,
                                order.encrypted_revenue, pos_config.certificate_serial_number, pos_config.name)
 
         order.order_signature = create_signature(a_trust_session, order_data)

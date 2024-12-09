@@ -57,15 +57,26 @@ patch(Order.prototype, {
             "Sig-Voriger-Beleg": this.prev_order_signature
         }
 
-        const json = JSON.stringify(fancyQrObject);
-        const base64 = btoa(json);
+        const machine_readable_code = "_R1-AT0_" +
+            this.pos.config.name + '_' +
+            this.registrierkasse_receipt_number + '_' +
+            serializeDateTime(this.date_order) + '_' +
+            sum_vat_normal + '_' +
+            sum_vat_discounted_1 + '_' +
+            sum_vat_discounted_1 + '_' +
+            sum_vat_null + '_' +
+            sum_vat_special + '_' +
+            this.encrypted_revenue + '_' +
+            this.certificate_serial_number + '_' +
+            this.prev_order_signature + '_' +
+            this.order_signature;
 
         const patchedData = {
             ...originalData,
             pos_kasse_code:
                 (this.finalized || ["paid", "done", "invoiced"].includes(this.state)) &&
                 qrCodeSrc(
-                    json
+                    machine_readable_code
                 ),
         };
         return patchedData;

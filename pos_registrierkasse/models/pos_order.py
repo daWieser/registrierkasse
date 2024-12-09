@@ -53,7 +53,7 @@ class CustomPOSOrder(models.Model):
                                                        config.name, receipt_number)
 
         a_trust_session = SessionData(config.a_trust_session_key, config.a_trust_session_id)
-        order_data = OrderData(config.name, receipt_number, order['date_order'], 0, 0, 0, 0, encrypt_revenue,
+        order_data = OrderData(config.name, receipt_number, order['date_order'], 0, 0, 0, 0, 0, encrypt_revenue,
                                config.certificate_serial_number, prev_order.order_signature)
 
         try:
@@ -80,7 +80,7 @@ class CustomPOSOrder(models.Model):
         # However for the qr code it needs to be 5 bytes. So the first 5 bytes of the revenue counter are filled
         data = int(revenue_counter * 100).to_bytes(5, byteorder='big') + b'\x00' * 11
 
-        encrypted =  encryptor.update(data) + encryptor.finalize()[:5]
+        encrypted = encryptor.update(data) + encryptor.finalize()[:5]
         return str(b64encode(encrypted))
 
     def _init_vector(self, pos_name, bill_number):

@@ -25,6 +25,7 @@ class OrderData:
     sum_vat_discounted_1: float
     sum_vat_discounted_2: float
     sum_vat_null: float
+    sum_vat_special: float
     revenue_counter_encrypted: str
     certificate_serial_number: str
     prev_order_signature: str
@@ -39,6 +40,7 @@ class OrderData:
             str(self.sum_vat_discounted_1) + '_' +
             str(self.sum_vat_discounted_2) + '_' +
             str(self.sum_vat_null) + '_' +
+            str(self.sum_vat_special) + '_' +
             str(self.revenue_counter_encrypted) + '_' +
             str(self.certificate_serial_number) + '_' +
             str(self.prev_order_signature))
