@@ -1,10 +1,9 @@
 import unittest
+from base64 import b64encode
+from hashlib import sha256
+from unittest.mock import MagicMock
 
 from .a_trust_library import OrderData
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from hashlib import sha256
-from base64 import b64decode, b64encode
-from unittest.mock import MagicMock, patch
 
 
 def chain_hash(config, order):
@@ -36,22 +35,6 @@ def hash_signature(signature):
     return b64encode(relevant_bytes).decode("utf-8")
 
 
-def _init_vector(pos_name, bill_number):
-    return modes.CTR(sha256((pos_name + str(bill_number)).encode('utf-8')).digest()[:16])
-
-
-def encrypt_revenue_counter(revenue_counter, aes_key, pos_name, sequence_number):
-    cipher = Cipher(algorithms.AES(b64decode(aes_key)), _init_vector(pos_name, sequence_number))
-    encryptor = cipher.encryptor()
-
-    # According to the detailed Specification, the length of a block needs to be 16 Bytes.
-    # However for the qr code it needs to be 5 bytes. So the first 5 bytes of the revenue counter are filled
-    data = int(revenue_counter * 100).to_bytes(5, byteorder='big') + b'\x00' * 11
-
-    encrypted = encryptor.update(data) + encryptor.finalize()[:5]
-    return b64encode(encrypted).decode('utf-8')
-
-
 class PosUtilsTest(unittest.TestCase):
     BELEG_CODE = "_R1-AT0_DEMO-CASH-BOX524_366587_2015-12-17T11:23:44_34,77_59,64_38,13_0,00_0,00_8MG8C1Kr7HA=_20f2ed172daa09e5_xTfZvkBSTr4="
     BELEG_SIGNATURE = "GeWps9kci-fUqKLymS1pHlIbv0L8Oek-v6TDmZj9Ffucb8yvSijqZ8LcBalV9lADMXQ8U3itViKkd_i1Ba22BA"
@@ -80,11 +63,11 @@ class PosUtilsTest(unittest.TestCase):
         order = MagicMock()
         order.registrierkasse_receipt_number = "366587"
         order.date_order = "2015-12-17T11:23:44"
-        order.sum_vat_normal = "34,77"
-        order.sum_vat_discounted_1 = "59,64"
-        order.sum_vat_discounted_2 = "38,13"
-        order.sum_vat_null = "0,00"
-        order.sum_vat_special = "0,00"
+        order.sum_vat_normal = 34.77
+        order.sum_vat_discounted_1 = 59.64
+        order.sum_vat_discounted_2 = 38.13
+        order.sum_vat_null = 0
+        order.sum_vat_special = 0
         order.encrypted_revenue = "8MG8C1Kr7HA="
         order.prev_order_signature = "xTfZvkBSTr4="
         order.order_signature = self.BELEG_SIGNATURE

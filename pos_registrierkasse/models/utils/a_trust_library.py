@@ -1,7 +1,7 @@
+import base64
 from dataclasses import dataclass
 
 from requests import get, put, post, delete
-import base64
 
 
 @dataclass()
@@ -32,18 +32,21 @@ class OrderData:
 
     def parse(self):
         return (
-            '_R1-AT0_' + #replace AT0 with the correct value for a-trust
-            str(self.pos_name) + '_' +
-            str(self.receipt_number) + '_' +
-            str(self.receipt_date) + '_' +
-            str(self.sum_vat_normal) + '_' +
-            str(self.sum_vat_discounted_1) + '_' +
-            str(self.sum_vat_discounted_2) + '_' +
-            str(self.sum_vat_null) + '_' +
-            str(self.sum_vat_special) + '_' +
-            str(self.revenue_counter_encrypted) + '_' +
-            str(self.certificate_serial_number) + '_' +
-            str(self.prev_order_signature))
+                '_R1-AT0_' +  # replace AT0 with the correct value for a-trust
+                str(self.pos_name) + '_' +
+                str(self.receipt_number) + '_' +
+                str(self.receipt_date) + '_' +
+                self._format_number(self.sum_vat_normal) + '_' +
+                self._format_number(self.sum_vat_discounted_1) + "_" +
+                self._format_number(self.sum_vat_discounted_2) + "_" +
+                self._format_number(self.sum_vat_null) + "_" +
+                self._format_number(self.sum_vat_special) + "_" +
+                str(self.revenue_counter_encrypted) + '_' +
+                str(self.certificate_serial_number) + '_' +
+                str(self.prev_order_signature))
+
+    def _format_number(self, value):
+        return "{:.2f}".format(value).replace(".", ",")
 
 
 basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
@@ -85,6 +88,7 @@ def create_signature(session, orderData):
         raise Exception("got the following error from signature: " + str(response.status_code))
     return response.json()['signature']
 
+
 def get_serial_number(user):
     url = basePath + '/' + user.username + '/Certificates'
     response = get(url)
@@ -95,4 +99,3 @@ def get_serial_number(user):
     if response.status_code != 200:
         raise Exception("got the following error from signature: " + str(response.status_code))
     return response.json()
-

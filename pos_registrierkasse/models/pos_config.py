@@ -1,7 +1,8 @@
 from odoo import api, models, fields
 
 from .utils.a_trust_library import OrderData, create_signature, login, LoginData
-from .utils.order_utils import encrypt_revenue_counter, hash_signature
+from .utils.order_utils import hash_signature
+from .utils.revenue_counter import encrypt_revenue_counter
 
 
 class CustomPOSConfig(models.Model):

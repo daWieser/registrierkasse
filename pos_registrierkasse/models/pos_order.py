@@ -1,7 +1,8 @@
 from odoo import api, models, fields
 
 from .utils.a_trust_library import SessionData, OrderData, LoginData, create_signature, login
-from .utils.order_utils import encrypt_revenue_counter, chain_hash
+from .utils.order_utils import chain_hash
+from .utils.revenue_counter import encrypt_revenue_counter
 
 
 class CustomPOSOrder(models.Model):
@@ -62,9 +63,11 @@ class CustomPOSOrder(models.Model):
         prev_order = self.env['pos.order'].search(
             [('registrierkasse_receipt_number', '=', int(receipt_number) - 1),
              ('config_id', '=', config.id)])
-
-        encrypt_revenue = encrypt_revenue_counter(config.revenue_counter, config.registrierkasse_aes_key,
-                                                       config.name, receipt_number)
+        if order["is_refund"]:
+            encrypted_revenue = "U1RP"  # base64 encoded "STO" string
+        else:
+            encrypted_revenue = encrypt_revenue_counter(config.revenue_counter, config.registrierkasse_aes_key,
+                                                        config.name, receipt_number)
 
         a_trust_session = SessionData(config.a_trust_session_key, config.a_trust_session_id)
 
@@ -76,7 +79,7 @@ class CustomPOSOrder(models.Model):
                                order["sum_vat_discounted_2"],
                                order["sum_vat_null"],
                                order["sum_vat_special"],
-                               encrypt_revenue,
+                               encrypted_revenue,
                                config.certificate_serial_number,
                                chain_hash(config, prev_order))
 
@@ -89,7 +92,7 @@ class CustomPOSOrder(models.Model):
             order_signature = create_signature(a_trust_session, order_data)
 
         return {
-            'encrypted_revenue': encrypt_revenue,
+            'encrypted_revenue': encrypted_revenue,
             'order_signature': order_signature,
             'certificate_serial_number': config.certificate_serial_number,
             'prev_order_signature': order_data.prev_order_signature,

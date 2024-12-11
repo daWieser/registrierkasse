@@ -14,20 +14,26 @@ patch(Order.prototype, {
         const originalData = super.export_for_printing();
 
 
+        let formatted = new Intl.NumberFormat('de-DE', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+
         const machine_readable_code = "_R1-AT0_" +
             this.pos.config.name + '_' +
             this.registrierkasse_receipt_number + '_' +
             serializeDateTime(this.date_order) + '_' +
-            this.sum_vat_normal + '_' +
-            this.sum_vat_discounted_1 + '_' +
-            this.sum_vat_discounted_1 + '_' +
-            this.sum_vat_null + '_' +
-            this.sum_vat_special + '_' +
+            formatted.format(this.sum_vat_normal) + '_' +
+            formatted.format(this.sum_vat_discounted_1) + '_' +
+            formatted.format(this.sum_vat_discounted_1) + '_' +
+            formatted.format(this.sum_vat_null) + '_' +
+            formatted.format(this.sum_vat_special) + '_' +
             this.encrypted_revenue + '_' +
             this.certificate_serial_number + '_' +
             this.prev_order_signature + '_' +
             this.order_signature;
 
+        console.log(machine_readable_code)
         const patchedData = {
             ...originalData,
             pos_kasse_code:
@@ -65,6 +71,7 @@ patch(Order.prototype, {
         json.sum_vat_discounted_2 = this.sum_vat_discounted_2;
         json.sum_vat_null = this.sum_vat_null;
         json.sum_vat_special = this.sum_vat_special;
+        json.is_refund = this._isRefundOrder();
         return json
     }
 
