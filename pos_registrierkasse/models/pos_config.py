@@ -1,8 +1,7 @@
-from base64 import b64encode
-
 from odoo import api, models, fields
 
-from .a_trust_library import OrderData, create_signature, SessionData, login, LoginData
+from .utils.a_trust_library import OrderData, create_signature, login, LoginData
+from .utils.order_utils import encrypt_revenue_counter, hash_signature
 
 
 class CustomPOSConfig(models.Model):
@@ -76,7 +75,7 @@ class CustomPOSConfig(models.Model):
         order.action_pos_order_paid()
         order.write({'state': 'done'})
 
-        order.encrypted_revenue = order.encrypt_revenue_counter(0, pos_config.registrierkasse_aes_key, pos_config.name,
+        order.encrypted_revenue = encrypt_revenue_counter(0, pos_config.registrierkasse_aes_key, pos_config.name,
                                                                 order.registrierkasse_receipt_number)
 
         a_trust_session = login(LoginData(pos_config.a_trust_user_name, pos_config.a_trust_password))
@@ -85,7 +84,7 @@ class CustomPOSConfig(models.Model):
         pos_config.a_trust_session_key = a_trust_session.sessionKey
 
         order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0, 0,
-                               order.encrypted_revenue, pos_config.certificate_serial_number, pos_config.name)
+                               order.encrypted_revenue, pos_config.certificate_serial_number, hash_signature(pos_config.name))
 
         order.order_signature = create_signature(a_trust_session, order_data)
 

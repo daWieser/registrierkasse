@@ -32,7 +32,7 @@ class OrderData:
 
     def parse(self):
         return (
-            '_R1-AT75_' + #replace AT75 with the correct value for a-trust
+            '_R1-AT0_' + #replace AT0 with the correct value for a-trust
             str(self.pos_name) + '_' +
             str(self.receipt_number) + '_' +
             str(self.receipt_date) + '_' +
@@ -95,3 +95,4 @@ def get_serial_number(user):
     if response.status_code != 200:
         raise Exception("got the following error from signature: " + str(response.status_code))
     return response.json()
+
