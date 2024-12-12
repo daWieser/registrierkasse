@@ -4,9 +4,6 @@
 import {Order} from "@point_of_sale/app/store/models";
 import {patch} from '@web/core/utils/patch';
 import {qrCodeSrc} from "@point_of_sale/utils";
-import {
-    serializeDateTime,
-} from "@web/core/l10n/dates";
 
 patch(Order.prototype, {
     export_for_printing() {
@@ -18,11 +15,10 @@ patch(Order.prototype, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })
-
         const machine_readable_code = "_R1-AT0_" +
             this.pos.config.name + '_' +
             this.registrierkasse_receipt_number + '_' +
-            serializeDateTime(this.date_order) + '_' +
+            this.date_order.toFormat("yyyy-MM-dd'T'HH:mm:ss") + '_' +
             formatted.format(this.sum_vat_normal) + '_' +
             formatted.format(this.sum_vat_discounted_1) + '_' +
             formatted.format(this.sum_vat_discounted_1) + '_' +
@@ -33,8 +29,7 @@ patch(Order.prototype, {
             this.prev_order_signature + '_' +
             this.order_signature;
 
-        console.log(machine_readable_code)
-        const patchedData = {
+        return {
             ...originalData,
             pos_kasse_code:
                 (this.finalized || ["paid", "done", "invoiced"].includes(this.state)) &&
@@ -42,7 +37,6 @@ patch(Order.prototype, {
                     machine_readable_code
                 ),
         };
-        return patchedData;
     },
 
     init_from_JSON(json) {
