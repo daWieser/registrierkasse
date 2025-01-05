@@ -2,7 +2,7 @@ from odoo import api, models, fields
 
 from .utils.a_trust_library import OrderData, create_signature, login, LoginData
 from .utils.order_utils import hash_signature
-from .utils.revenue_counter import encrypt_revenue_counter
+from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
 
 class CustomPOSConfig(models.Model):
@@ -15,15 +15,18 @@ class CustomPOSConfig(models.Model):
                                                "to customize the reference numbers of your orders.", copy=False,
                                           ondelete='restrict')
 
-    registrierkasse_aes_key = fields.Char(string='Umsatzzähler AES', required=True, translate=True)
-    revenue_counter = fields.Float(string='Total', digits=0, required=True, default=0)
+    registrierkasse_aes_key = fields.Char(string='Umsatzzähler AES', translate=True)
+    registrierkasse_aes_key_checksum = fields.Char(string='Umsatzzähler AES Prüfsumme', translate=True)
+    revenue_counter = fields.Float(string='Total', digits=0, default=0)
 
-    a_trust_user_name = fields.Char(string='A-Trust User Name', required=True)
-    a_trust_password = fields.Char(string='A-Trust Password', required=True)
-    certificate_serial_number = fields.Char(string='A-Trust Certificate Serial Number', required=True)
+    a_trust_user_name = fields.Char(string='A-Trust User Name')
+    a_trust_password = fields.Char(string='A-Trust Password')
+    certificate_serial_number = fields.Char(string='A-Trust Certificate Serial Number')
 
     a_trust_session_key = fields.Char(string='A-Trust Session Key')
     a_trust_session_id = fields.Char(string='A-Trust Session Id')
+    pos_use_registrierkasse = fields.Boolean(string='Does this POS use the RKSV module')
+    pos_rksv_lock = fields.Boolean(string='If this lock is set, RKSV settings can not be changed')
 
     def copy(self, default=None):
         raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
@@ -34,7 +37,8 @@ class CustomPOSConfig(models.Model):
         if not pos_config.receipt_sequence_id:
             pos_config.receipt_sequence_id = self._create_sequence(pos_config)
 
-        self._create_starting_receipt(pos_config)
+        if pos_config.pos_use_registrierkasse:
+            self._create_starting_receipt(pos_config)
         return pos_config
 
     def _create_sequence(self, pos_config):
@@ -77,15 +81,17 @@ class CustomPOSConfig(models.Model):
         order.write({'state': 'done'})
 
         order.encrypted_revenue = encrypt_revenue_counter(0, pos_config.registrierkasse_aes_key, pos_config.name,
-                                                                order.registrierkasse_receipt_number)
+                                                          order.registrierkasse_receipt_number)
 
         a_trust_session = login(LoginData(pos_config.a_trust_user_name, pos_config.a_trust_password))
 
         pos_config.a_trust_session_id = a_trust_session.sessionId
         pos_config.a_trust_session_key = a_trust_session.sessionKey
+        pos_config.pos_rksv_lock = True
 
         order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0, 0,
-                               order.encrypted_revenue, pos_config.certificate_serial_number, hash_signature(pos_config.name))
+                               order.encrypted_revenue, pos_config.certificate_serial_number,
+                               hash_signature(pos_config.name))
 
         order.order_signature = create_signature(a_trust_session, order_data)
 
@@ -102,3 +108,18 @@ class CustomPOSConfig(models.Model):
                 'available_in_pos': True
             })
         return product
+
+    @api.model
+    def write(self, vals):
+        temp = super(CustomPOSConfig, self).write(vals)
+        if "pos_use_registrierkasse" in vals:
+            self._create_starting_receipt(self)
+        return temp
+
+    @api.onchange('registrierkasse_aes_key')
+    def generate_aes_key(self):
+        # This is not a very nice
+        for record in self:
+            if not record.registrierkasse_aes_key:
+                record.registrierkasse_aes_key = generate_aes_key()
+            record.registrierkasse_aes_key_checksum = generate_aes_checksum(record.registrierkasse_aes_key)

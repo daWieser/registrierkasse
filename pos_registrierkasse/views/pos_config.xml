@@ -7,23 +7,50 @@
             <field name="model">pos.config</field>
             <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
             <field name="arch" type="xml">
-                <!-- Example: Add a new field under the settings tab -->
+                <xpath expr="//div[@id='title']" position="replace">
+                    <div class="oe_title" id="title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. NYC Shop" readonly="pos_rksv_lock"/>
+                        </h1>
+                    </div>
+                </xpath>
                 <xpath expr="//div[@id='title']" position="after">
-                <div class="row">
-                    <label for="registrierkasse_aes_key" string="AES Schlüssel für Umsatzzähler" class="col-lg-4 o_light_label" />
-                    <field name="registrierkasse_aes_key" />
-                </div>
-                <div class="row">
-                    <label for="a_trust_user_name" string="A Trust User" class="col-lg-4 o_light_label" />
-                    <field name="a_trust_user_name" />
-
-                    <label for="a_trust_password" string="A Trust Password" class="col-lg-4 o_light_label" />
-                    <field name="a_trust_password" />
-                </div>
-                <div class="row">
-                    <label for="certificate_serial_number" string="A certificate serial number" class="col-lg-4 o_light_label" />
-                    <field name="certificate_serial_number" />
-                </div>
+                    <div title="RKSV Settings" class="row mt16 o_settings_container">
+                        <setting id="rskv_compliance" string="RSKV Compliance"
+                                 help="Make this POS RSKV compliant">
+                            <field name="pos_use_registrierkasse"
+                                   readonly="pos_rksv_lock"/>
+                            <div class="content-group" invisible="not pos_use_registrierkasse">
+                                <div class="row mt16">
+                                    <label for="registrierkasse_aes_key" string="AES Schlüssel für Umsatzzähler"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="registrierkasse_aes_key" class="col-lg-4"
+                                           readonly="pos_rksv_lock"/>
+                                    <label for="registrierkasse_aes_key_checksum" string="AES Schlüssel Prüfsumme"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="registrierkasse_aes_key_checksum" class="col-lg-4"
+                                           readonly="true"/>
+                                </div>
+                                <div class="row mt16">
+                                    <label for="a_trust_user_name" string="A Trust User"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="a_trust_user_name"/>
+                                </div>
+                                <div class="row mt16">
+                                    <label for="a_trust_password" string="A Trust Password"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="a_trust_password"/>
+                                </div>
+                                <div class="row mt16">
+                                    <label for="certificate_serial_number" string="A certificate serial number"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="certificate_serial_number"/>
+                                </div>
+                            </div>
+                            <field name="pos_rksv_lock" invisible="1"/>
+                        </setting>
+                    </div>
                 </xpath>
             </field>
         </record>

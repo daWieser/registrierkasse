@@ -20,7 +20,9 @@ patch(PaymentScreen.prototype, {
             const product_taxes = pos.get_taxes_after_fp(line.product.taxes_id, order.fiscal_position);
             const lineAmount = line.get_price_with_tax();
 
-            switch (product_taxes[0].amount) {
+            const taxAmount = product_taxes[0]?.amount ?? 0;
+
+            switch (taxAmount) {
                 case 20:
                     sum_vat_normal += lineAmount;
                     break;
@@ -48,12 +50,12 @@ patch(PaymentScreen.prototype, {
             "sign_order",
             [this.currentOrder.export_as_JSON()]
         );
-
         this.currentOrder.certificate_serial_number = signature.certificate_serial_number
         this.currentOrder.prev_order_signature = signature.prev_order_signature
         this.currentOrder.order_signature = signature.order_signature
         this.currentOrder.encrypted_revenue = signature.encrypted_revenue
         this.currentOrder.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
+
 
         return super._finalizeValidation();
     }

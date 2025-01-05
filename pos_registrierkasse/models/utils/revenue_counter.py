@@ -1,16 +1,9 @@
 import unittest
 from base64 import b64decode, b64encode
 from hashlib import sha256
+import os
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
-
-def _init_vector(pos_name, bill_number):
-    return modes.CTR(sha256(_init_vector_string(pos_name, bill_number).encode('utf-8')).digest()[:16])
-
-
-def _init_vector_string(pos_name, bill_number):
-    return pos_name + str(bill_number).zfill(5)
 
 
 def encrypt_revenue_counter(revenue_counter, aes_key, pos_name, sequence_number):
@@ -25,11 +18,26 @@ def encrypt_revenue_counter(revenue_counter, aes_key, pos_name, sequence_number)
     return b64encode(encrypted).decode('utf-8')
 
 
+def _init_vector(pos_name, bill_number):
+    return modes.CTR(sha256(_init_vector_string(pos_name, bill_number).encode('utf-8')).digest()[:16])
+
+
+def _init_vector_string(pos_name, bill_number):
+    return pos_name + str(bill_number).zfill(5)
+
+def generate_aes_key():
+    key = os.urandom(32)
+    return b64encode(key).decode('utf-8')
+
+def generate_aes_checksum(aes_key: str):
+    hash = sha256(aes_key.encode("utf-8")).digest()
+    return b64encode(hash[:3]).decode('utf-8').rstrip("=")
+
 class PosUtilsTest(unittest.TestCase):
     AES_KEY = "yrv/OHCvvATh6P64DOBpdAXc97ZhBP9FyB/NPmrfRI4="
 
     def test_init_vector_string(self):
-        self.assertEquals(_init_vector_string('DEMO-CASH-BOX524', 1),
+        self.assertEqual(_init_vector_string('DEMO-CASH-BOX524', 1),
                           'DEMO-CASH-BOX52400001',
                           "Init vector string")
 
@@ -76,6 +84,8 @@ class PosUtilsTest(unittest.TestCase):
         encryptor = cipher.decryptor()
         return (encryptor.update(encrypted) + encryptor.finalize())[:5]
 
+    def test_aes_check_sum(self):
+        self.assertEqual(generate_aes_checksum("cWhay3H4asTvRzXzXGZQ3KyBEu9BZaIxl8J+L4Bhr5A="),"qx6p")
 
 if __name__ == "__main__":
     unittest.main()

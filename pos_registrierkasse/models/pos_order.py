@@ -40,16 +40,16 @@ class CustomPOSOrder(models.Model):
     @api.model
     def _order_fields(self, ui_order):
         result = super(CustomPOSOrder, self)._order_fields(ui_order)
-        result['encrypted_revenue'] = ui_order['encrypted_revenue']
-        result['order_signature'] = ui_order['order_signature']
-        result['prev_order_signature'] = ui_order['prev_order_signature']
-        result['certificate_serial_number'] = ui_order['certificate_serial_number']
-        result['registrierkasse_receipt_number'] = ui_order['registrierkasse_receipt_number']
-        result['sum_vat_normal'] = ui_order['sum_vat_normal']
-        result['sum_vat_discounted_1'] = ui_order['sum_vat_discounted_1']
-        result['sum_vat_discounted_2'] = ui_order['sum_vat_discounted_2']
-        result['sum_vat_null'] = ui_order['sum_vat_null']
-        result['sum_vat_special'] = ui_order['sum_vat_special']
+        result['encrypted_revenue'] = ui_order.get('encrypted_revenue')
+        result['order_signature'] = ui_order.get('order_signature')
+        result['prev_order_signature'] = ui_order.get('prev_order_signature')
+        result['certificate_serial_number'] = ui_order.get('certificate_serial_number')
+        result['registrierkasse_receipt_number'] = ui_order.get('registrierkasse_receipt_number')
+        result['sum_vat_normal'] = ui_order.get('sum_vat_normal')
+        result['sum_vat_discounted_1'] = ui_order.get('sum_vat_discounted_1')
+        result['sum_vat_discounted_2'] = ui_order.get('sum_vat_discounted_2')
+        result['sum_vat_null'] = ui_order.get('sum_vat_null')
+        result['sum_vat_special'] = ui_order.get('sum_vat_special')
         return result
 
     @api.model
