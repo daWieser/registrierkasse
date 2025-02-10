@@ -1,6 +1,8 @@
+import json
+
 from odoo import api, models, fields
 
-from .utils.a_trust_library import OrderData, create_signature, login, LoginData
+from .utils.a_trust_library import OrderData, create_signature, login, LoginData, get_certificate_information
 from .utils.order_utils import hash_signature
 from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
@@ -22,11 +24,21 @@ class CustomPOSConfig(models.Model):
     a_trust_user_name = fields.Char(string='A-Trust User Name')
     a_trust_password = fields.Char(string='A-Trust Password')
     certificate_serial_number = fields.Char(string='A-Trust Certificate Serial Number')
+    signature_certificate = fields.Char(string='Signaturzertifikat for Beleg Gruppe')
+    certificate_certification_body = fields.Text(string='Zertifizierungsstellen for Beleg Gruppe')
 
     a_trust_session_key = fields.Char(string='A-Trust Session Key')
     a_trust_session_id = fields.Char(string='A-Trust Session Id')
     pos_use_registrierkasse = fields.Boolean(string='Does this POS use the RKSV module')
     pos_rksv_lock = fields.Boolean(string='If this lock is set, RKSV settings can not be changed')
+
+    # daten_erfassungs_protokoll_name = fields.Char(string="Datenerfassungsprotokoll Filename",
+    #                                               default="Datenerfassungsprotokoll", store=False)
+    # daten_erfassungs_protokoll = fields.Binary(
+    #     string="Datenerfassungsprotokoll",
+    #     compute="_compute_daten_erfassungs_protokoll",
+    #     store=False  # Set to True if you want to store the file persistently
+    # )
 
     def copy(self, default=None):
         raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
@@ -34,8 +46,6 @@ class CustomPOSConfig(models.Model):
     @api.model
     def create(self, vals):
         pos_config = super(CustomPOSConfig, self).create(vals)
-        if not pos_config.receipt_sequence_id:
-            pos_config.receipt_sequence_id = self._create_sequence(pos_config)
 
         if pos_config.pos_use_registrierkasse:
             self._create_starting_receipt(pos_config)
@@ -51,6 +61,9 @@ class CustomPOSConfig(models.Model):
         return sequence
 
     def _create_starting_receipt(self, pos_config):
+        if not pos_config.receipt_sequence_id:
+            pos_config.receipt_sequence_id = self._create_sequence(pos_config)
+
         pos_session = self.env['pos.session'].create({
             'name': 'Starting recipt session',  # Name of the session
             'config_id': pos_config.id,
@@ -73,7 +86,8 @@ class CustomPOSConfig(models.Model):
             }), ],
             'session_id': pos_session.id,
             'registrierkasse_receipt_number': pos_config.receipt_sequence_id.next_by_id(),
-            'certificate_serial_number': pos_config.certificate_serial_number
+            'certificate_serial_number': pos_config.certificate_serial_number,
+            'prev_order_signature': hash_signature(pos_config.name)
         })
         order.pos_reference = str(pos_session.id).zfill(5) + "-" + '0'.zfill(3) + "-" + '1'.zfill(4)
 
@@ -89,9 +103,15 @@ class CustomPOSConfig(models.Model):
         pos_config.a_trust_session_key = a_trust_session.sessionKey
         pos_config.pos_rksv_lock = True
 
+        signature_data = get_certificate_information(pos_config.a_trust_user_name)
+
+        pos_config.certificate_serial_number = signature_data.certificate_serial_number
+        pos_config.signature_certificate = signature_data.signature_certificate
+        pos_config.certificate_certification_body = json.dumps(signature_data.certification_body)
+
         order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0, 0,
                                order.encrypted_revenue, pos_config.certificate_serial_number,
-                               hash_signature(pos_config.name))
+                               order.prev_order_signature)
 
         order.order_signature = create_signature(a_trust_session, order_data)
 
@@ -123,3 +143,10 @@ class CustomPOSConfig(models.Model):
             if not record.registrierkasse_aes_key:
                 record.registrierkasse_aes_key = generate_aes_key()
             record.registrierkasse_aes_key_checksum = generate_aes_checksum(record.registrierkasse_aes_key)
+
+    def action_download_daten_erfassungs_protokoll(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/download/pos_registrierkasse/{self.id}',
+            'target': 'self',
+        }

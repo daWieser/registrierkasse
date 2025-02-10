@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+        <record id="view_pos_config_kanban_extension" model="ir.ui.view">
+            <field name="name">pos.config.kanban.view.extension</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_config_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[contains(@class,'dropdown-pos-config')]" position="inside"/>
+                <div class="col-6 o_kanban_card_manage_section o_kanban_manage_new">
+                    <h5 role="menuitem" class="o_kanban_card_manage_title">
+                        <span>RKSV</span>
+                    </h5>
+                    <div role="menuitem">
+                        <button name="action_download_daten_erfassungs_protokoll" type="object" string="Datenerfassungsprotokoll"/>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -42,11 +42,6 @@
                                            class="col-lg-4 o_light_label"/>
                                     <field name="a_trust_password"/>
                                 </div>
-                                <div class="row mt16">
-                                    <label for="certificate_serial_number" string="A certificate serial number"
-                                           class="col-lg-4 o_light_label"/>
-                                    <field name="certificate_serial_number"/>
-                                </div>
                             </div>
                             <field name="pos_rksv_lock" invisible="1"/>
                         </setting>

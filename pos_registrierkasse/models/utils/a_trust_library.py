@@ -48,6 +48,11 @@ class OrderData:
     def _format_number(self, value):
         return "{:.2f}".format(value).replace(".", ",")
 
+@dataclass()
+class CertificateInformation:
+    certificate_serial_number: str
+    signature_certificate: str
+    certification_body: [str]
 
 basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
 
@@ -89,8 +94,8 @@ def create_signature(session, orderData):
     return response.json()['signature']
 
 
-def get_serial_number(user):
-    url = basePath + '/' + user.username + '/Certificates'
+def get_certificate_information(username):
+    url = basePath + '/' + username + '/Certificates'
     response = get(url)
 
     if response.status_code == 401:
@@ -98,4 +103,5 @@ def get_serial_number(user):
 
     if response.status_code != 200:
         raise Exception("got the following error from signature: " + str(response.status_code))
-    return response.json()
+    certificate = response.json()['Signaturzertifikate'][0]
+    return CertificateInformation(certificate['Zertifikatsseriennummer'],certificate['Signaturzertifikat'], certificate['Zertifizierungsstellen'])

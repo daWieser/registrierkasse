@@ -28,5 +28,6 @@
     },
     'data': [
         'views/pos_config.xml',
+        'views/point_of_sale_dashboard.xml',
     ],
 }
