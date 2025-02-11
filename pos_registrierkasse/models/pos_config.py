@@ -132,11 +132,11 @@ class CustomPOSConfig(models.Model):
     @api.model
     def write(self, vals):
         temp = super(CustomPOSConfig, self).write(vals)
-        if "pos_use_registrierkasse" in vals:
+        if "pos_use_registrierkasse" in vals and vals["pos_use_registrierkasse"]:
             self._create_starting_receipt(self)
         return temp
 
-    @api.onchange('registrierkasse_aes_key')
+    @api.onchange('pos_use_registrierkasse')
     def generate_aes_key(self):
         # This is not a very nice
         for record in self:
