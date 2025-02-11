@@ -3,7 +3,7 @@ Open source Odoo addon, to enable RKSV compliance in Odoo POS.
 
 ## How to use
 ### Enable RKSV compliance on your POS
-To comply with Austrian law, you will need a signature certificate from A-Trust. You can get this certificate from [office@vorstieg.eu](office@vorstieg.eu).
+To comply with Austrian law, you will need a signature certificate from A-Trust. You can get this certificate from [office@vorstieg.eu](mailto:office@vorstieg.eu).
 The AES key is automatically generated and needs to be registered with Finanzonline.
 When the POS is saved with RKSV enabled, a Startbeleg is automatically created, and can be registered with the "BMF Belegchek" app.
 ![screenshot RKSV settings](./pos_registrierkasse/static/description/rskv_1.png)
