@@ -1,5 +1,5 @@
 ## RSKV-konforme Registrierkasse
-Open-Source-Odoo-Addon, das Odoo POS RSKV-konform macht.
+Open source Odoo addon, to enable RKSV compliance in Odoo POS.
 
 ## How to use
 ### Enable RKSV compliance on your POS
