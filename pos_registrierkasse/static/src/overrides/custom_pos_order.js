@@ -1,24 +1,24 @@
 /** @odoo-module **/
 
 
-import {Order} from "@point_of_sale/app/store/models";
+import {PosOrder} from "@point_of_sale/app/models/pos_order";
 import {patch} from '@web/core/utils/patch';
 import {qrCodeSrc} from "@point_of_sale/utils";
+import {formatDateTime, parseDateTime} from "@web/core/l10n/dates";
 
-patch(Order.prototype, {
-    export_for_printing() {
-        // Call the original method
-        const originalData = super.export_for_printing();
+patch(PosOrder.prototype, {
+    export_for_printing(baseUrl, headerData) {
+        const results = super.export_for_printing(...arguments);
 
-
+        const date = parseDateTime(this.date_order);
         let formatted = new Intl.NumberFormat('de-DE', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
         })
         const machine_readable_code = "_R1-AT0_" +
-            this.pos.config.name + '_' +
+            this.session_id.config_id.name + '_' +
             this.registrierkasse_receipt_number + '_' +
-            this.date_order.toFormat("yyyy-MM-dd'T'HH:mm:ss") + '_' +
+            formatDateTime(date, {format: "yyyy-MM-dd'T'HH:mm:ss", tz: "Europe/Vienna"}) + '_' +
             formatted.format(this.sum_vat_normal) + '_' +
             formatted.format(this.sum_vat_discounted_1) + '_' +
             formatted.format(this.sum_vat_discounted_1) + '_' +
@@ -28,45 +28,8 @@ patch(Order.prototype, {
             this.certificate_serial_number + '_' +
             this.prev_order_signature + '_' +
             this.order_signature;
+        results.pos_kasse_code = qrCodeSrc(machine_readable_code)
 
-        return {
-            ...originalData,
-            pos_kasse_code:
-                (this.finalized || ["paid", "done", "invoiced"].includes(this.state)) &&
-                qrCodeSrc(
-                    machine_readable_code
-                ),
-        };
-    },
-
-    init_from_JSON(json) {
-        super.init_from_JSON(json);
-        this.encrypted_revenue = json.encrypted_revenue;
-        this.certificate_serial_number = json.certificate_serial_number;
-        this.prev_order_signature = json.prev_order_signature;
-        this.order_signature = json.order_signature;
-        this.registrierkasse_receipt_number = json.registrierkasse_receipt_number;
-        this.sum_vat_normal = json.sum_vat_normal;
-        this.sum_vat_discounted_1 = json.sum_vat_discounted_1;
-        this.sum_vat_discounted_2 = json.sum_vat_discounted_2;
-        this.sum_vat_null = json.sum_vat_null;
-        this.sum_vat_special = json.sum_vat_special;
-    },
-
-    export_as_JSON() {
-        const json = super.export_as_JSON();
-        json.encrypted_revenue = this.encrypted_revenue;
-        json.certificate_serial_number = this.certificate_serial_number;
-        json.prev_order_signature = this.prev_order_signature;
-        json.order_signature = this.order_signature;
-        json.registrierkasse_receipt_number = this.registrierkasse_receipt_number;
-        json.sum_vat_normal = this.sum_vat_normal;
-        json.sum_vat_discounted_1 = this.sum_vat_discounted_1;
-        json.sum_vat_discounted_2 = this.sum_vat_discounted_2;
-        json.sum_vat_null = this.sum_vat_null;
-        json.sum_vat_special = this.sum_vat_special;
-        json.is_refund = this._isRefundOrder();
-        return json
+        return results;
     }
-
 });

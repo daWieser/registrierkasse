@@ -32,24 +32,17 @@ class CustomPOSConfig(models.Model):
     pos_use_registrierkasse = fields.Boolean(string='Does this POS use the RKSV module')
     pos_rksv_lock = fields.Boolean(string='If this lock is set, RKSV settings can not be changed')
 
-    # daten_erfassungs_protokoll_name = fields.Char(string="Datenerfassungsprotokoll Filename",
-    #                                               default="Datenerfassungsprotokoll", store=False)
-    # daten_erfassungs_protokoll = fields.Binary(
-    #     string="Datenerfassungsprotokoll",
-    #     compute="_compute_daten_erfassungs_protokoll",
-    #     store=False  # Set to True if you want to store the file persistently
-    # )
-
     def copy(self, default=None):
         raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
 
-    @api.model
-    def create(self, vals):
-        pos_config = super(CustomPOSConfig, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        pos_configs = super().create(vals_list)
 
-        if pos_config.pos_use_registrierkasse:
-            self._create_starting_receipt(pos_config)
-        return pos_config
+        for pos_config in pos_configs:
+            if pos_config.pos_use_registrierkasse:
+                self._create_starting_receipt(pos_config)
+        return pos_configs
 
     def _create_sequence(self, pos_config):
         sequence = self.env['ir.sequence'].create({

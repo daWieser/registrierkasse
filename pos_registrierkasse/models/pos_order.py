@@ -22,42 +22,45 @@ class CustomPOSOrder(models.Model):
     sum_vat_null = fields.Float(string='VAT null', digits=(16, 2), required=True, default=0)
     sum_vat_special = fields.Float(string='VAT special', digits=(16, 2), required=True, default=0)
 
-    def _export_for_ui(self, order):
-        result = super(CustomPOSOrder, self)._export_for_ui(order)
-        result['encrypted_revenue'] = order.encrypted_revenue
-        result['order_signature'] = order.order_signature
-        result['prev_order_signature'] = order.prev_order_signature
-        result['certificate_serial_number'] = order.certificate_serial_number
-        result['registrierkasse_receipt_number'] = order.registrierkasse_receipt_number
-        result['sum_vat_normal'] = order['sum_vat_normal']
-        result['sum_vat_discounted_1'] = order['sum_vat_discounted_1']
-        result['sum_vat_discounted_2'] = order['sum_vat_discounted_2']
-        result['sum_vat_null'] = order['sum_vat_null']
-        result['sum_vat_special'] = order['sum_vat_special']
+    # def _export_for_ui(self, order):
+    #     result = super(CustomPOSOrder, self)._export_for_ui(order)
+    #     result['encrypted_revenue'] = order.encrypted_revenue
+    #     result['order_signature'] = order.order_signature
+    #     result['prev_order_signature'] = order.prev_order_signature
+    #     result['certificate_serial_number'] = order.certificate_serial_number
+    #     result['registrierkasse_receipt_number'] = order.registrierkasse_receipt_number
+    #     result['sum_vat_normal'] = order['sum_vat_normal']
+    #     result['sum_vat_discounted_1'] = order['sum_vat_discounted_1']
+    #     result['sum_vat_discounted_2'] = order['sum_vat_discounted_2']
+    #     result['sum_vat_null'] = order['sum_vat_null']
+    #     result['sum_vat_special'] = order['sum_vat_special']
+    #
+    #     return result
 
-        return result
-
-    @api.model
-    def _order_fields(self, ui_order):
-        result = super(CustomPOSOrder, self)._order_fields(ui_order)
-        result['encrypted_revenue'] = ui_order.get('encrypted_revenue')
-        result['order_signature'] = ui_order.get('order_signature')
-        result['prev_order_signature'] = ui_order.get('prev_order_signature')
-        result['certificate_serial_number'] = ui_order.get('certificate_serial_number')
-        result['registrierkasse_receipt_number'] = ui_order.get('registrierkasse_receipt_number')
-        result['sum_vat_normal'] = ui_order.get('sum_vat_normal')
-        result['sum_vat_discounted_1'] = ui_order.get('sum_vat_discounted_1')
-        result['sum_vat_discounted_2'] = ui_order.get('sum_vat_discounted_2')
-        result['sum_vat_null'] = ui_order.get('sum_vat_null')
-        result['sum_vat_special'] = ui_order.get('sum_vat_special')
-        return result
+    # @api.model
+    # def _order_fields(self, ui_order):
+    #     result = super(CustomPOSOrder, self)._order_fields(ui_order)
+    #     result['encrypted_revenue'] = ui_order.get('encrypted_revenue')
+    #     result['order_signature'] = ui_order.get('order_signature')
+    #     result['prev_order_signature'] = ui_order.get('prev_order_signature')
+    #     result['certificate_serial_number'] = ui_order.get('certificate_serial_number')
+    #     result['registrierkasse_receipt_number'] = ui_order.get('registrierkasse_receipt_number')
+    #     result['sum_vat_normal'] = ui_order.get('sum_vat_normal')
+    #     result['sum_vat_discounted_1'] = ui_order.get('sum_vat_discounted_1')
+    #     result['sum_vat_discounted_2'] = ui_order.get('sum_vat_discounted_2')
+    #     result['sum_vat_null'] = ui_order.get('sum_vat_null')
+    #     result['sum_vat_special'] = ui_order.get('sum_vat_special')
+    #     return result
 
     @api.model
     def sign_order(self, order):
-        session_id = order['pos_session_id']
+        session_id = order['session_id']
 
         session = self.env['pos.session'].browse(session_id)
         config = session.config_id
+
+        if not config.pos_use_registrierkasse:
+            return {}
 
         config.revenue_counter = config.revenue_counter + order['amount_total']
 
@@ -65,7 +68,7 @@ class CustomPOSOrder(models.Model):
         prev_order = self.env['pos.order'].search(
             [('registrierkasse_receipt_number', '=', int(receipt_number) - 1),
              ('config_id', '=', config.id)])
-        if order["is_refund"]:
+        if order["has_refundable_lines"]:
             encrypted_revenue = "U1RP"  # base64 encoded "STO" string
         else:
             encrypted_revenue = encrypt_revenue_counter(config.revenue_counter, config.registrierkasse_aes_key,

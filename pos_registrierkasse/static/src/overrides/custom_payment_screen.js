@@ -15,14 +15,12 @@ patch(PaymentScreen.prototype, {
         let sum_vat_special = 0;
 
         const order = this.currentOrder;
-        const pos = order.pos;
-        order.orderlines.forEach(function (line) {
-            const product_taxes = pos.get_taxes_after_fp(line.product.taxes_id, order.fiscal_position);
+        order.lines.forEach(function (line) {
             const lineAmount = line.get_price_with_tax();
 
-            const taxAmount = product_taxes[0]?.amount ?? 0;
+            const taxPercentage = line.tax_ids[0].amount ?? 0;
 
-            switch (taxAmount) {
+            switch (taxPercentage) {
                 case 20:
                     sum_vat_normal += lineAmount;
                     break;
@@ -39,23 +37,19 @@ patch(PaymentScreen.prototype, {
                     sum_vat_special += lineAmount;
             }
         });
-        this.currentOrder.sum_vat_normal = sum_vat_normal;
-        this.currentOrder.sum_vat_discounted_1 = sum_vat_discounted_1;
-        this.currentOrder.sum_vat_discounted_2 = sum_vat_discounted_2;
-        this.currentOrder.sum_vat_null = sum_vat_null;
-        this.currentOrder.sum_vat_special = sum_vat_special;
+        order.sum_vat_normal = sum_vat_normal;
+        order.sum_vat_discounted_1 = sum_vat_discounted_1;
+        order.sum_vat_discounted_2 = sum_vat_discounted_2;
+        order.sum_vat_null = sum_vat_null;
+        order.sum_vat_special = sum_vat_special;
 
-        const signature = await this.orm.call(
-            "pos.order",
-            "sign_order",
-            [this.currentOrder.export_as_JSON()]
-        );
-        this.currentOrder.certificate_serial_number = signature.certificate_serial_number
-        this.currentOrder.prev_order_signature = signature.prev_order_signature
-        this.currentOrder.order_signature = signature.order_signature
-        this.currentOrder.encrypted_revenue = signature.encrypted_revenue
-        this.currentOrder.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
+        const signature = await this.pos.data.call("pos.order", "sign_order", [order.serialize()]);
 
+        order.certificate_serial_number = signature.certificate_serial_number
+        order.prev_order_signature = signature.prev_order_signature
+        order.order_signature = signature.order_signature
+        order.encrypted_revenue = signature.encrypted_revenue
+        order.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
 
         return super._finalizeValidation();
     }
