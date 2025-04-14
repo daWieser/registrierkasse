@@ -28,7 +28,9 @@ patch(PosOrder.prototype, {
             this.certificate_serial_number + '_' +
             this.prev_order_signature + '_' +
             this.order_signature;
-        results.pos_kasse_code = qrCodeSrc(machine_readable_code)
+        results.pos_kasse_code = qrCodeSrc(machine_readable_code);
+        results.kassenidentifikationsnummer = this.session_id.config_id.name;
+        results.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
 
         return results;
     }
