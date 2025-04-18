@@ -29,6 +29,9 @@ patch(Order.prototype, {
             this.prev_order_signature + '_' +
             this.order_signature;
 
+            originalData.kassenidentifikationsnummer = this.pos.config.name;
+            originalData.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
+
         return {
             ...originalData,
             pos_kasse_code:

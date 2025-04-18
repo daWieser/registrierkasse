@@ -32,14 +32,6 @@ class CustomPOSConfig(models.Model):
     pos_use_registrierkasse = fields.Boolean(string='Does this POS use the RKSV module')
     pos_rksv_lock = fields.Boolean(string='If this lock is set, RKSV settings can not be changed')
 
-    # daten_erfassungs_protokoll_name = fields.Char(string="Datenerfassungsprotokoll Filename",
-    #                                               default="Datenerfassungsprotokoll", store=False)
-    # daten_erfassungs_protokoll = fields.Binary(
-    #     string="Datenerfassungsprotokoll",
-    #     compute="_compute_daten_erfassungs_protokoll",
-    #     store=False  # Set to True if you want to store the file persistently
-    # )
-
     def copy(self, default=None):
         raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
 
@@ -63,6 +55,17 @@ class CustomPOSConfig(models.Model):
     def _create_starting_receipt(self, pos_config):
         if not pos_config.receipt_sequence_id:
             pos_config.receipt_sequence_id = self._create_sequence(pos_config)
+
+        a_trust_session = login(LoginData(pos_config.a_trust_user_name, pos_config.a_trust_password))
+        signature_data = get_certificate_information(pos_config.a_trust_user_name)
+
+        pos_config.a_trust_session_id = a_trust_session.sessionId
+        pos_config.a_trust_session_key = a_trust_session.sessionKey
+        pos_config.pos_rksv_lock = True
+        pos_config.certificate_serial_number = signature_data.certificate_serial_number
+        pos_config.signature_certificate = signature_data.signature_certificate
+        pos_config.certificate_certification_body = json.dumps(signature_data.certification_body)
+
 
         pos_session = self.env['pos.session'].create({
             'name': 'Starting recipt session',  # Name of the session
@@ -97,17 +100,9 @@ class CustomPOSConfig(models.Model):
         order.encrypted_revenue = encrypt_revenue_counter(0, pos_config.registrierkasse_aes_key, pos_config.name,
                                                           order.registrierkasse_receipt_number)
 
-        a_trust_session = login(LoginData(pos_config.a_trust_user_name, pos_config.a_trust_password))
 
-        pos_config.a_trust_session_id = a_trust_session.sessionId
-        pos_config.a_trust_session_key = a_trust_session.sessionKey
-        pos_config.pos_rksv_lock = True
 
-        signature_data = get_certificate_information(pos_config.a_trust_user_name)
 
-        pos_config.certificate_serial_number = signature_data.certificate_serial_number
-        pos_config.signature_certificate = signature_data.signature_certificate
-        pos_config.certificate_certification_body = json.dumps(signature_data.certification_body)
 
         order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0, 0,
                                order.encrypted_revenue, pos_config.certificate_serial_number,
