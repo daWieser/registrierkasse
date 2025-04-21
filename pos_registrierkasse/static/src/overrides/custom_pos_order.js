@@ -15,7 +15,7 @@ patch(Order.prototype, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })
-        const machine_readable_code = "_R1-AT0_" +
+        const machine_readable_code = "_R1-AT1_" +
             this.pos.config.name + '_' +
             this.registrierkasse_receipt_number + '_' +
             this.date_order.toFormat("yyyy-MM-dd'T'HH:mm:ss") + '_' +

@@ -32,7 +32,7 @@ class OrderData:
 
     def parse(self):
         return (
-                '_R1-AT0_' +  # replace AT0 with the correct value for a-trust
+                '_R1-AT1_' +  # AT1 ist die Kenung von A-Trust
                 str(self.pos_name) + '_' +
                 str(self.receipt_number) + '_' +
                 str(self.receipt_date) + '_' +
