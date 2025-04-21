@@ -54,7 +54,7 @@ class CertificateInformation:
     signature_certificate: str
     certification_body: [str]
 
-basePath = "https://rksv.a-trust.at/asignrkonline/v2/"
+basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
 
 
 def login(user):
@@ -104,4 +104,4 @@ def get_certificate_information(username):
     if response.status_code != 200:
         raise Exception("got the following error from signature: " + str(response.status_code))
     certificate = response.json()['Signaturzertifikate'][0]
-    return CertificateInformation(certificate['Zertifikatsseriennummer'],certificate['Signaturzertifikat'], certificate['Zertifizierungsstellen'])
+    return CertificateInformation(certificate['ZertifikatsseriennummerHex'],certificate['Signaturzertifikat'], certificate['Zertifizierungsstellen'])
