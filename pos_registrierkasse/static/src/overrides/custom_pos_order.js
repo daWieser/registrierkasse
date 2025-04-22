@@ -26,7 +26,8 @@ patch(Order.prototype, {
             formatted.format(this.sum_vat_special) + '_' +
             this.encrypted_revenue + '_' +
             this.certificate_serial_number + '_' +
-            this.prev_order_signature;
+            this.prev_order_signature + '_' +
+            this.order_signature;
 
             originalData.kassenidentifikationsnummer = this.pos.config.name;
             originalData.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;

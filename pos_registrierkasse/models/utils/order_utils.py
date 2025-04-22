@@ -55,6 +55,7 @@ class PosUtilsTest(unittest.TestCase):
             "Hash normaler Beleg")
 
     def test_chain_hash(self):
+        OrderData.ALGO_KENNUNG = '_R1-AT0_'  # AT1 ist die Kenung von A-Trust
         config = MagicMock()
 
         config.name = "DEMO-CASH-BOX524"
