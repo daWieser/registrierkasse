@@ -27,7 +27,7 @@ patch(Order.prototype, {
             this.encrypted_revenue + '_' +
             this.certificate_serial_number + '_' +
             this.prev_order_signature + '_' +
-            this.order_signature;
+            this._base64UrlToBase64(this.order_signature);
 
             originalData.kassenidentifikationsnummer = this.pos.config.name;
             originalData.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
@@ -40,6 +40,12 @@ patch(Order.prototype, {
                     machine_readable_code
                 ),
         };
+    },
+
+    _base64UrlToBase64(str){
+          const base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
+          const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
+          return  base64Encoded + padding;
     },
 
     init_from_JSON(json) {
