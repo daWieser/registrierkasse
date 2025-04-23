@@ -3,7 +3,7 @@ import json
 from odoo import api, models, fields
 
 from .utils.a_trust_library import OrderData, create_signature, login, LoginData, get_certificate_information
-from .utils.order_utils import hash_signature
+from .utils.order_utils import hash_signature, format_order_date
 from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
 
@@ -104,7 +104,7 @@ class CustomPOSConfig(models.Model):
 
 
 
-        order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0, 0,
+        order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, format_order_date(str(order.date_order)), 0, 0, 0, 0, 0,
                                order.encrypted_revenue, pos_config.certificate_serial_number,
                                order.prev_order_signature)
 

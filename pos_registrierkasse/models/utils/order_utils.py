@@ -1,8 +1,9 @@
 import unittest
-from base64 import b64encode
+from base64 import b64encode, urlsafe_b64encode
 from hashlib import sha256
 from unittest.mock import MagicMock
-
+from datetime import datetime
+import pytz
 from .a_trust_library import OrderData
 
 
@@ -22,7 +23,7 @@ def chain_hash(config, order):
 
 
 def jws_signature_compact(payload, signature):
-    encoded_payload = b64encode(payload.encode('utf-8')).decode("utf-8")
+    encoded_payload = urlsafe_b64encode(payload.encode('utf-8')).decode("utf-8")
 
     # the padding characters need to be removed with the rstrip function, since JWS requires base64-URĹ encoding, instead of normal base64
     encoded_payload = encoded_payload.rstrip("=")
@@ -33,6 +34,14 @@ def hash_signature(signature):
     hash_value = sha256(signature.encode('utf-8')).digest()
     relevant_bytes = hash_value[:8]
     return b64encode(relevant_bytes).decode("utf-8")
+
+
+def format_order_date(date):
+    utc_time = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+    utc_time = utc_time.replace(tzinfo=pytz.UTC)
+
+    local_time = utc_time.astimezone(pytz.timezone("Europe/Vienna"))
+    return datetime.strftime(local_time, "%Y-%m-%dT%H:%M:%S")
 
 
 class PosUtilsTest(unittest.TestCase):
@@ -75,6 +84,8 @@ class PosUtilsTest(unittest.TestCase):
 
         self.assertEqual(chain_hash(config, order), "5HjRCx+XIz4=", "Chain Hash is calculated correctly")
 
+    def test_format_order_date(self):
+        self.assertEqual(format_order_date("2025-04-23 15:34:22"),"2025-04-23T17:34:22")
 
 if __name__ == "__main__":
     unittest.main()

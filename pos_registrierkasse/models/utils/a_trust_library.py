@@ -57,6 +57,9 @@ class CertificateInformation:
 
 basePath = "https://rksv.a-trust.at/asignrkonline/v2/"
 
+#Test environment:
+# basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
+
 
 def login(user):
     url = basePath + '/Session/' + user.username
@@ -79,10 +82,16 @@ def logout(session):
 
 
 def create_signature(session, orderData):
+    jws_payload = orderData.parse()
+    jws_payload = base64.urlsafe_b64encode(bytes( jws_payload , 'utf-8') ).decode('utf-8').rstrip("=")
+
+    to_be_signed = "eyJhbGciOiJFUzI1NiJ9" + '.' + jws_payload
+    to_be_signed = base64.b64encode(bytes(to_be_signed, 'utf-8')).decode('ascii')
+
     url = basePath + '/Session/' + session.sessionId + '/Sign'
     payload = {
         "sessionkey": session.sessionKey,
-        "to_be_signed": base64.encodebytes(bytes(orderData.parse(), 'utf-8')).decode('utf-8'),
+        "to_be_signed": to_be_signed,
     }
 
     response = post(url, json=payload)
