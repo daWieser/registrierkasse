@@ -1,8 +1,8 @@
+import unittest
 import base64
 from dataclasses import dataclass
 
 from requests import get, put, post, delete
-
 
 @dataclass()
 class SessionData:
@@ -29,10 +29,11 @@ class OrderData:
     revenue_counter_encrypted: str
     certificate_serial_number: str
     prev_order_signature: str
+    ALGO_KENNUNG = '_R1-AT1_'  # AT1 ist die Kenung von A-Trust
 
     def parse(self):
         return (
-                '_R1-AT0_' +  # replace AT0 with the correct value for a-trust
+                OrderData.ALGO_KENNUNG +
                 str(self.pos_name) + '_' +
                 str(self.receipt_number) + '_' +
                 str(self.receipt_date) + '_' +
@@ -56,6 +57,9 @@ class CertificateInformation:
 
 basePath = "https://rksv.a-trust.at/asignrkonline/v2/"
 
+#Test environment:
+# basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
+
 
 def login(user):
     url = basePath + '/Session/' + user.username
@@ -78,10 +82,16 @@ def logout(session):
 
 
 def create_signature(session, orderData):
+    jws_payload = orderData.parse()
+    jws_payload = base64.urlsafe_b64encode(bytes( jws_payload , 'utf-8') ).decode('utf-8').rstrip("=")
+
+    to_be_signed = "eyJhbGciOiJFUzI1NiJ9" + '.' + jws_payload
+    to_be_signed = base64.b64encode(bytes(to_be_signed, 'utf-8')).decode('ascii')
+
     url = basePath + '/Session/' + session.sessionId + '/Sign'
     payload = {
         "sessionkey": session.sessionKey,
-        "to_be_signed": base64.encodebytes(bytes(orderData.parse(), 'utf-8')).decode('utf-8'),
+        "to_be_signed": to_be_signed,
     }
 
     response = post(url, json=payload)
@@ -104,4 +114,18 @@ def get_certificate_information(username):
     if response.status_code != 200:
         raise Exception("got the following error from signature: " + str(response.status_code))
     certificate = response.json()['Signaturzertifikate'][0]
-    return CertificateInformation(certificate['Zertifikatsseriennummer'],certificate['Signaturzertifikat'], certificate['Zertifizierungsstellen'])
+    return CertificateInformation(certificate['ZertifikatsseriennummerHex'], certificate['Signaturzertifikat'],
+                                  certificate['Zertifizierungsstellen'])
+
+
+class PosUtilsTest(unittest.TestCase):
+    def test_parse_order_data(self):
+        expected = "_R1-AT1_DEMO-CASH-BOX524_366585AB_2015-12-17T11:23:43_5,00_0,00_9,00_13,30_0,00_VFJB_245abcde_OJ16FcqeA7s"
+
+        orderData = OrderData("DEMO-CASH-BOX524", "366585AB", "2015-12-17T11:23:43", 5, 0, 9, 13.3, 0, "VFJB",
+                              "245abcde", "OJ16FcqeA7s")
+        self.assertEqual(expected, orderData.parse())
+
+
+if __name__ == "__main__":
+    unittest.main()

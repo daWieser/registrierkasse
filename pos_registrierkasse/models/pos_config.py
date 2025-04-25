@@ -3,7 +3,7 @@ import json
 from odoo import api, models, fields
 
 from .utils.a_trust_library import OrderData, create_signature, login, LoginData, get_certificate_information
-from .utils.order_utils import hash_signature
+from .utils.order_utils import hash_signature, format_order_date
 from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
 
@@ -57,6 +57,17 @@ class CustomPOSConfig(models.Model):
         if not pos_config.receipt_sequence_id:
             pos_config.receipt_sequence_id = self._create_sequence(pos_config)
 
+        a_trust_session = login(LoginData(pos_config.a_trust_user_name, pos_config.a_trust_password))
+        signature_data = get_certificate_information(pos_config.a_trust_user_name)
+
+        pos_config.a_trust_session_id = a_trust_session.sessionId
+        pos_config.a_trust_session_key = a_trust_session.sessionKey
+        pos_config.pos_rksv_lock = True
+        pos_config.certificate_serial_number = signature_data.certificate_serial_number
+        pos_config.signature_certificate = signature_data.signature_certificate
+        pos_config.certificate_certification_body = json.dumps(signature_data.certification_body)
+
+
         pos_session = self.env['pos.session'].create({
             'name': 'Starting recipt session',  # Name of the session
             'config_id': pos_config.id,
@@ -90,19 +101,11 @@ class CustomPOSConfig(models.Model):
         order.encrypted_revenue = encrypt_revenue_counter(0, pos_config.registrierkasse_aes_key, pos_config.name,
                                                           order.registrierkasse_receipt_number)
 
-        a_trust_session = login(LoginData(pos_config.a_trust_user_name, pos_config.a_trust_password))
 
-        pos_config.a_trust_session_id = a_trust_session.sessionId
-        pos_config.a_trust_session_key = a_trust_session.sessionKey
-        pos_config.pos_rksv_lock = True
 
-        signature_data = get_certificate_information(pos_config.a_trust_user_name)
 
-        pos_config.certificate_serial_number = signature_data.certificate_serial_number
-        pos_config.signature_certificate = signature_data.signature_certificate
-        pos_config.certificate_certification_body = json.dumps(signature_data.certification_body)
 
-        order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, order.date_order, 0, 0, 0, 0, 0,
+        order_data = OrderData(pos_config.name, order.registrierkasse_receipt_number, format_order_date(str(order.date_order)), 0, 0, 0, 0, 0,
                                order.encrypted_revenue, pos_config.certificate_serial_number,
                                order.prev_order_signature)
 

@@ -1,9 +1,7 @@
 from odoo import api, models, fields
-from datetime import datetime
-import pytz
 
 from .utils.a_trust_library import SessionData, OrderData, LoginData, create_signature, login
-from .utils.order_utils import chain_hash
+from .utils.order_utils import chain_hash, format_order_date
 from .utils.revenue_counter import encrypt_revenue_counter
 
 
@@ -76,15 +74,9 @@ class CustomPOSOrder(models.Model):
 
         a_trust_session = SessionData(config.a_trust_session_key, config.a_trust_session_id)
 
-        utc_time = datetime.strptime(order['date_order'], "%Y-%m-%d %H:%M:%S")
-        utc_time = utc_time.replace(tzinfo=pytz.UTC)
-
-        local_time = utc_time.astimezone(pytz.timezone("Europe/Vienna"))
-        iso_date = datetime.strftime(local_time, "%Y-%m-%dT%H:%M:%S")
-
         order_data = OrderData(config.name,
                                receipt_number,
-                               iso_date,
+                               format_order_date(order['date_order']),
                                order["sum_vat_normal"],
                                order["sum_vat_discounted_1"],
                                order["sum_vat_discounted_2"],

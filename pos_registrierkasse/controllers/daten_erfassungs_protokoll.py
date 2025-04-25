@@ -8,6 +8,8 @@ from odoo.http import request, content_disposition
 
 from odoo.addons.pos_registrierkasse.models.utils.a_trust_library import OrderData
 
+from odoo.addons.pos_registrierkasse.models.utils.order_utils import jws_signature_compact
+
 
 class DatenErfassungsProtokollController(http.Controller):
 
@@ -67,4 +69,4 @@ class DatenErfassungsProtokollController(http.Controller):
                                order.encrypted_revenue,
                                config.certificate_serial_number,
                                order.prev_order_signature)
-        return order_data.parse()
+        return jws_signature_compact(order_data.parse(), order.order_signature)
