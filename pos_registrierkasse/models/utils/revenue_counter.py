@@ -23,7 +23,7 @@ def _init_vector(pos_name, bill_number):
 
 
 def _init_vector_string(pos_name, bill_number):
-    return pos_name + str(bill_number).zfill(5)
+    return pos_name + str(bill_number)
 
 def generate_aes_key():
     key = os.urandom(32)
@@ -38,15 +38,15 @@ class PosUtilsTest(unittest.TestCase):
 
     def test_init_vector_string(self):
         self.assertEqual(_init_vector_string('DEMO-CASH-BOX524', 1),
-                          'DEMO-CASH-BOX52400001',
+                          'DEMO-CASH-BOX5241',
                           "Init vector string")
 
     def test_revenue_counter(self):
-        self.assertEqual(encrypt_revenue_counter('0',
-                                                 self.AES_KEY,
-                                                 "DEMO-CASH-BOX",
+        self.assertEqual(encrypt_revenue_counter(0,
+                                                 "mWSdfdY96cjlFE5+eKCzcXinWuBzhJvmMJ60QRvBJLI=",
+                                                 "demokasse42",
                                                  1),
-                         'TJUK/sNj38aLxlSb69mekQ==',
+                         'zCuys3ZTbnT5hI0lGUo0Yg==',
                          "Revenue counter 0")
 
     def test_decrypt_revenue_counter_zero(self):
