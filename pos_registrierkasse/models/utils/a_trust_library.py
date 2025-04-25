@@ -55,10 +55,10 @@ class CertificateInformation:
     signature_certificate: str
     certification_body: [str]
 
-basePath = "https://rksv.a-trust.at/asignrkonline/v2/"
+# basePath = "https://rksv.a-trust.at/asignrkonline/v2/"
 
 #Test environment:
-# basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
+basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
 
 
 def login(user):

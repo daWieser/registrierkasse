@@ -16,7 +16,7 @@ patch(PosOrder.prototype, {
             maximumFractionDigits: 2,
         })
         const machine_readable_code = "_R1-AT1_" +
-            this.session_id.config_id.name + '_' +
+            this.config_id.name + '_' +
             this.registrierkasse_receipt_number + '_' +
             formatDateTime(date, {format: "yyyy-MM-dd'T'HH:mm:ss", tz: "Europe/Vienna"}) + '_' +
             formatted.format(this.sum_vat_normal) + '_' +
@@ -30,13 +30,15 @@ patch(PosOrder.prototype, {
             this._base64UrlToBase64(this.order_signature);
 
         results.pos_kasse_code = qrCodeSrc(machine_readable_code);
-        results.kassenidentifikationsnummer = this.session_id.config_id.name;
+        results.kassenidentifikationsnummer = this.config_id.name;
         results.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
-        },
 
-    _base64UrlToBase64(str){
-          const base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
-          const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
+        return results;
+    },
+
+    _base64UrlToBase64(str) {
+        const base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
+        const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
           return  base64Encoded + padding;
     },
 });
