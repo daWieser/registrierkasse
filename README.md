@@ -9,7 +9,7 @@ When the POS is saved with RKSV enabled, a Startbeleg is automatically created, 
 ![screenshot RKSV settings](./pos_registrierkasse/static/description/rskv_1.png)
 
 ### Nullbeleg
-When enabling the RKSV option on any POS, a Nullbelegprokt is automatically created. This product is needed for Startbeleg, as well as for the monthly and yearly end receipt.
+When enabling the RKSV option on any POS, a Nullbelegprodukt is automatically created. This product is needed for Startbeleg, as well as for the monthly and yearly end receipt.
 When an officer of the financial police checks the POS, it is necessary to create a empty receipt with this product.
 ![screenshot with Nullbeleg](./pos_registrierkasse/static/description/rskv_2.png)
 

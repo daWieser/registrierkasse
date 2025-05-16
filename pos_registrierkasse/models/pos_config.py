@@ -41,7 +41,7 @@ class CustomPOSConfig(models.Model):
 
         for pos_config in pos_configs:
             if pos_config.pos_use_registrierkasse:
-                self._create_starting_receipt(pos_config)
+                self._create_null_receipt(pos_config)
         return pos_configs
 
     def _create_sequence(self, pos_config):
@@ -53,7 +53,11 @@ class CustomPOSConfig(models.Model):
         })
         return sequence
 
-    def _create_starting_receipt(self, pos_config):
+    def _cron_create_monthly_receipt(self):
+        for config_instance in self.env['pos.config'].search([('pos_use_registrierkasse', '=', True)]):
+            config_instance._create_null_receipt(config_instance)
+
+    def _create_null_receipt(self, pos_config):
         if not pos_config.receipt_sequence_id:
             pos_config.receipt_sequence_id = self._create_sequence(pos_config)
 
@@ -129,7 +133,7 @@ class CustomPOSConfig(models.Model):
     def write(self, vals):
         temp = super(CustomPOSConfig, self).write(vals)
         if "pos_use_registrierkasse" in vals and vals["pos_use_registrierkasse"]:
-            self._create_starting_receipt(self)
+            self._create_null_receipt(self)
         return temp
 
     @api.onchange('pos_use_registrierkasse')
