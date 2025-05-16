@@ -30,5 +30,6 @@
     'data': [
         'views/pos_config.xml',
         'views/point_of_sale_dashboard.xml',
+        'data/monthly_nullbeleg_cron.xml',
     ],
 }
