@@ -13,6 +13,8 @@ When enabling the RKSV option on any POS, a Nullbelegprodukt is automatically cr
 When an officer of the financial police checks the POS, it is necessary to create a empty receipt with this product.
 ![screenshot with Nullbeleg](./pos_registrierkasse/static/description/rskv_2.png)
 
+This module also provides an automated task (cron job) which creates the monthly Nullbeleg. It is highly recommended to configure this job to run during non-business hours to avoid interfering with active POS sessions.
+
 ### Datenerfassungsprotokoll
 According to Austrian law, all receipts need to be exported and backed up once per quarter. To do this, you can export the Datenerfassungsprokoll once for every POS.
 ![screenshot with Datenerfassungsprotokoll](./pos_registrierkasse/static/description/rskv_3.png)
