@@ -97,3 +97,27 @@ class CustomPOSOrder(models.Model):
             'registrierkasse_receipt_number': receipt_number,
             'rksv_signed': True
         }
+
+    @api.model
+    def _process_order(self, *args, **kwargs):
+        """
+        This override enforces a consistent pos_reference on the server.
+        """
+        order_id = super()._process_order(*args, **kwargs)
+
+        order_rec = self.browse(order_id)
+
+        # Check if the order has our RKSV receipt number.
+        if order_rec and order_rec.registrierkasse_receipt_number:
+            # Calculate the order's sequence within its session.
+            order_sequence_in_session = self.search_count([('session_id', '=', order_rec.session_id.id)])
+
+            new_ref = (f"{order_rec.session_id.id:05d}-"
+                       f"{order_sequence_in_session:03d}-"
+                       f"{order_rec.registrierkasse_receipt_number:04d}")
+
+            order_rec.write({
+                'pos_reference': new_ref
+            })
+
+        return order_id
