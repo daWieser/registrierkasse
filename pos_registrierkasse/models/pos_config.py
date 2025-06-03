@@ -95,7 +95,7 @@ class CustomPOSConfig(models.Model):
 
         order = self._rksv_create_null_order(
             pos_config_rec, pos_session, receipt_num, order_date_obj,
-            initial_prev_order_sig_hash)
+            initial_prev_order_sig_hash, 1)
         order.action_pos_order_paid()
 
         # Step 3: Perform RKSV Signing
@@ -134,9 +134,11 @@ class CustomPOSConfig(models.Model):
                 ], limit=1, order='registrierkasse_receipt_number desc, id desc')
                 prev_order_jws_hash_for_chaining = chain_hash(pos_config_rec, prev_rksv_order)
 
+                order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
+
                 order = self._rksv_create_null_order(
                     pos_config_rec, pos_session, receipt_num, order_date_obj,
-                    prev_order_jws_hash_for_chaining)
+                    prev_order_jws_hash_for_chaining, order_sequence_in_session)
                 order.action_pos_order_paid()
 
                 # Step 2: Perform RKSV Signing
@@ -213,7 +215,7 @@ class CustomPOSConfig(models.Model):
         return pos_session
 
     def _rksv_create_null_order(self, pos_config_rec, pos_session, receipt_num, order_date_obj,
-                                prev_signature_hash_for_order_field):
+                                prev_signature_hash_for_order_field, order_sequence_in_session):
         """Helper to create a null POS order for RKSV."""
         order = self.env['pos.order'].create({
             'date_order': order_date_obj,
@@ -225,7 +227,7 @@ class CustomPOSConfig(models.Model):
             'registrierkasse_receipt_number': receipt_num,
             'certificate_serial_number': pos_config_rec.certificate_serial_number,
             'prev_order_signature': prev_signature_hash_for_order_field,
-            'pos_reference': f"{pos_session.id:05d}-000-0001",
+            'pos_reference': f"{pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
             'state': 'done'
         })
         _logger.info(f"RKSV: Created POS Order (ID: {order.id}, Name: {order.name}) with number {receipt_num}.")
