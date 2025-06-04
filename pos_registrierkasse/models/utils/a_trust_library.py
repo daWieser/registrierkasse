@@ -29,7 +29,7 @@ class OrderData:
     revenue_counter_encrypted: str
     certificate_serial_number: str
     prev_order_signature: str
-    ALGO_KENNUNG = '_R1-AT1_'  # AT1 ist die Kenung von A-Trust
+    ALGO_KENNUNG = '_R1-AT1_'  # AT1 ist die Kennung von A-Trust
 
     def parse(self):
         return (
@@ -80,9 +80,8 @@ def logout(session):
     return response
 
 
-def create_signature(session, orderData):
-    jws_payload = orderData.parse()
-    jws_payload = base64.urlsafe_b64encode(bytes( jws_payload , 'utf-8') ).decode('utf-8').rstrip("=")
+def create_signature(session, machine_readable_code):
+    jws_payload = base64.urlsafe_b64encode(bytes( machine_readable_code , 'utf-8') ).decode('utf-8').rstrip("=")
 
     to_be_signed = "eyJhbGciOiJFUzI1NiJ9" + '.' + jws_payload
     to_be_signed = base64.b64encode(bytes(to_be_signed, 'utf-8')).decode('ascii')

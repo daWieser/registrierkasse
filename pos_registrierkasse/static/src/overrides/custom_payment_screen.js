@@ -47,6 +47,7 @@ patch(PaymentScreen.prototype, {
 
         order.certificate_serial_number = signature.certificate_serial_number
         order.prev_order_signature = signature.prev_order_signature
+        order.machine_readable_code = signature.machine_readable_code
         order.order_signature = signature.order_signature
         order.encrypted_revenue = signature.encrypted_revenue
         order.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
