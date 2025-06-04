@@ -5,49 +5,15 @@ import {Order} from "@point_of_sale/app/store/models";
 import {patch} from '@web/core/utils/patch';
 import {qrCodeSrc} from "@point_of_sale/utils";
 
-patch(Order.prototype, {
-    export_for_printing() {
-        // Call the original method
-        const originalData = super.export_for_printing();
+patch(PosOrder.prototype, {
+    export_for_printing(baseUrl, headerData) {
+        const results = super.export_for_printing(...arguments);
+        results.pos_kasse_code = qrCodeSrc(this.machine_readable_code);
+        results.kassenidentifikationsnummer = this.config_id.name;
+        results.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
 
-
-        let formatted = new Intl.NumberFormat('de-DE', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })
-        const machine_readable_code = "_R1-AT1_" +
-            this.pos.config.name + '_' +
-            this.registrierkasse_receipt_number + '_' +
-            this.date_order.toFormat("yyyy-MM-dd'T'HH:mm:ss") + '_' +
-            formatted.format(this.sum_vat_normal) + '_' +
-            formatted.format(this.sum_vat_discounted_1) + '_' +
-            formatted.format(this.sum_vat_discounted_1) + '_' +
-            formatted.format(this.sum_vat_null) + '_' +
-            formatted.format(this.sum_vat_special) + '_' +
-            this.encrypted_revenue + '_' +
-            this.certificate_serial_number + '_' +
-            this.prev_order_signature + '_' +
-            this._base64UrlToBase64(this.order_signature);
-
-            originalData.kassenidentifikationsnummer = this.pos.config.name;
-            originalData.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
-
-        return {
-            ...originalData,
-            pos_kasse_code:
-                (this.finalized || ["paid", "done", "invoiced"].includes(this.state)) &&
-                qrCodeSrc(
-                    machine_readable_code
-                ),
-        };
+        return results;
     },
-
-    _base64UrlToBase64(str){
-          const base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
-          const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
-          return  base64Encoded + padding;
-    },
-
     init_from_JSON(json) {
         super.init_from_JSON(json);
         this.encrypted_revenue = json.encrypted_revenue;
@@ -77,5 +43,4 @@ patch(Order.prototype, {
         json.is_refund = this._isRefundOrder();
         return json
     }
-
 });

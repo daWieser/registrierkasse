@@ -56,6 +56,12 @@ patch(PaymentScreen.prototype, {
         this.currentOrder.encrypted_revenue = signature.encrypted_revenue
         this.currentOrder.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
 
+        order.certificate_serial_number = signature.certificate_serial_number
+        order.prev_order_signature = signature.prev_order_signature
+        order.machine_readable_code = signature.machine_readable_code
+        order.order_signature = signature.order_signature
+        order.encrypted_revenue = signature.encrypted_revenue
+        order.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
 
         return super._finalizeValidation();
     }

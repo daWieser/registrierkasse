@@ -1,8 +1,7 @@
 from odoo import api, models, fields
-from odoo.exceptions import UserError
 
 from .utils.a_trust_library import SessionData, OrderData, LoginData, create_signature, login
-from .utils.order_utils import chain_hash, format_order_date
+from .utils.order_utils import chain_hash, format_order_date, base64url_to_base64
 from .utils.revenue_counter import encrypt_revenue_counter
 
 class CustomPOSOrder(models.Model):
@@ -11,6 +10,7 @@ class CustomPOSOrder(models.Model):
     encrypted_revenue = fields.Char(string='Encrypted revenue counter', translate=True)
     order_signature = fields.Char(string='Signature from signing unit', translate=True)
     prev_order_signature = fields.Char(string='Signature of the previous invoice', translate=True)
+    machine_readable_code = fields.Char(string='The whole code sent to A-Trust', translate=True)
     certificate_serial_number = fields.Char(string='Serial number of the ', translate=True)
     registrierkasse_receipt_number = fields.Integer(string='Sequence of receipt specific to RKSV ', index=True)
 
@@ -63,7 +63,8 @@ class CustomPOSOrder(models.Model):
         if not isinstance(date_order_str, str):
             date_order_str = fields.Datetime.to_string(fields.Datetime.now())
 
-        order_data_payload = OrderData(
+        prev_order_signature = chain_hash(config, prev_order)
+        machine_readable_code = OrderData(
             config.name,
             receipt_number,
             format_order_date(date_order_str),
@@ -74,26 +75,29 @@ class CustomPOSOrder(models.Model):
             order_data_dict.get("sum_vat_special", 0.0),
             encrypted_revenue,
             config.certificate_serial_number,
-            chain_hash(config, prev_order)
-        )
+            prev_order_signature
+        ).parse()
 
         try:
-            order_signature = create_signature(a_trust_session_data_obj, order_data_payload)
+            order_signature = create_signature(a_trust_session_data_obj, machine_readable_code)
         except PermissionError:
             a_trust_login_session = login(LoginData(config.a_trust_user_name, config.a_trust_password))
             config.a_trust_session_key = a_trust_login_session.sessionKey
             config.a_trust_session_id = a_trust_login_session.sessionId
             a_trust_session_data_obj_retry = SessionData(a_trust_login_session.sessionKey,
                                                          a_trust_login_session.sessionId)
-            order_signature = create_signature(a_trust_session_data_obj_retry, order_data_payload)
+            order_signature = create_signature(a_trust_session_data_obj_retry, machine_readable_code)
         except Exception as e:
             return {'error': f'A-Trust signature creation failed: {e}'}
+
+        machine_readable_code += '_' + base64url_to_base64(order_signature)
 
         return {
             'encrypted_revenue': encrypted_revenue,
             'order_signature': order_signature,
+            'machine_readable_code': machine_readable_code,
             'certificate_serial_number': config.certificate_serial_number,
-            'prev_order_signature': order_data_payload.prev_order_signature,
+            'prev_order_signature': prev_order_signature,
             'registrierkasse_receipt_number': receipt_number,
             'rksv_signed': True
         }

@@ -1,10 +1,11 @@
 import json
 import logging
+from base64 import urlsafe_b64encode
 from odoo import api, models, fields
 from odoo.exceptions import UserError
 
 from .utils.a_trust_library import SessionData, OrderData, create_signature, login, LoginData, get_certificate_information
-from .utils.order_utils import chain_hash, hash_signature, format_order_date
+from .utils.order_utils import chain_hash, hash_signature, format_order_date, base64url_to_base64
 from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
 _logger = logging.getLogger(__name__)
@@ -252,7 +253,7 @@ class CustomPOSConfig(models.Model):
 
         a_trust_session_for_signing = SessionData(pos_config_rec.a_trust_session_key, pos_config_rec.a_trust_session_id)
 
-        order_data_for_jws = OrderData(
+        machine_readable_code = OrderData(
             pos_config_rec.name,
             order_rec.registrierkasse_receipt_number,
             format_order_date(str(order_rec.date_order)),
@@ -260,10 +261,11 @@ class CustomPOSConfig(models.Model):
             encrypted_revenue_val,
             pos_config_rec.certificate_serial_number,
             prev_signature_for_jws_payload  # Use the specific previous hash passed for the JWS
-        )
+        ).parse()
+
 
         try:
-            actual_jws_signature = create_signature(a_trust_session_for_signing, order_data_for_jws)
+            actual_jws_signature = create_signature(a_trust_session_for_signing, machine_readable_code)
         except PermissionError:
             _logger.warning(f"RKSV: A-Trust re-login needed during signing for POS '{pos_config_rec.name}'.")
             a_trust_api_session_retry = login(
@@ -272,7 +274,7 @@ class CustomPOSConfig(models.Model):
             pos_config_rec.a_trust_session_id = a_trust_api_session_retry.sessionId
             a_trust_session_for_signing_retry = SessionData(a_trust_api_session_retry.sessionKey,
                                                             a_trust_api_session_retry.sessionId)
-            actual_jws_signature = create_signature(a_trust_session_for_signing_retry, order_data_for_jws)
+            actual_jws_signature = create_signature(a_trust_session_for_signing_retry, machine_readable_code)
         except Exception as e:
             _logger.error(
                 f"RKSV CRITICAL: Failed to sign JWS for Order ID {order_rec.id} on POS '{pos_config_rec.name}': {e}",
@@ -280,6 +282,9 @@ class CustomPOSConfig(models.Model):
             raise UserError(
                 f"Failed to sign JWS for Order ID {order_rec.id} on POS '{pos_config_rec.name}'. Error: {e}")
 
+        machine_readable_code += '_' + base64url_to_base64(actual_jws_signature)
+
         order_rec.encrypted_revenue = encrypted_revenue_val
         order_rec.order_signature = actual_jws_signature
+        order_rec.machine_readable_code = machine_readable_code
         _logger.info(f"RKSV: Order ID {order_rec.id} signed. JWS: {actual_jws_signature[:30]}...")
