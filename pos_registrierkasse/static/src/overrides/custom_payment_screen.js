@@ -17,8 +17,7 @@ patch(PaymentScreen.prototype, {
         const order = this.currentOrder;
         order.lines.forEach(function (line) {
             const lineAmount = line.get_price_with_tax();
-
-            const taxPercentage = line.tax_ids[0].amount ?? 0;
+            const taxPercentage = line.tax_ids?.[0]?.amount ?? 0;
 
             switch (taxPercentage) {
                 case 20:
@@ -31,7 +30,7 @@ patch(PaymentScreen.prototype, {
                     sum_vat_discounted_2 += lineAmount;
                     break;
                 case 0:
-                    sum_vat_discounted_2 += lineAmount;
+                    sum_vat_null += lineAmount;
                     break;
                 default:
                     sum_vat_special += lineAmount;
