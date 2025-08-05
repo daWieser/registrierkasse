@@ -3,6 +3,8 @@ import logging
 from base64 import urlsafe_b64encode
 from odoo import api, models, fields
 from odoo.exceptions import UserError
+from dateutil.relativedelta import relativedelta
+from datetime import timedelta, date
 
 from .utils.a_trust_library import SessionData, OrderData, create_signature, login, LoginData, get_certificate_information
 from .utils.order_utils import chain_hash, hash_signature, format_order_date, base64url_to_base64
@@ -35,6 +37,20 @@ class CustomPOSConfig(models.Model):
     pos_use_registrierkasse = fields.Boolean(string='Does this POS use the RKSV module')
     pos_rksv_lock = fields.Boolean(string='If this lock is set, RKSV settings can not be changed')
 
+    monthly_nullbeleg_time = fields.Float(string='Time for Nullbeleg', default=21.0)
+
+    a_trust_environment = fields.Selection(
+        [('test', 'Test Environment'), ('production', 'Production Environment')],
+        string='A-Trust Environment',
+        default='production'
+    )
+
+    def _get_a_trust_base_path(self):
+        if self.a_trust_environment == 'production':
+            return "https://rksv.a-trust.at/asignrkonline/v2"
+        else:
+            return "https://hs-abnahme.a-trust.at/asignrkonline/v2"
+
     def copy(self, default=None):
         raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
 
@@ -43,9 +59,13 @@ class CustomPOSConfig(models.Model):
         pos_configs = super().create(vals_list)
         for pos_config in pos_configs:
             if pos_config.pos_use_registrierkasse:
-                # Pass the newly created pos_config record
                 self._create_starting_receipt(pos_config)
+                pos_config._setup_cron_job()
         return pos_configs
+
+    @api.onchange('monthly_nullbeleg_time')
+    def _onchange_monthly_nullbeleg_time(self):
+        self._setup_cron_job()
 
     def _create_sequence(self, pos_config):
         sequence = self.env['ir.sequence'].create({
@@ -74,8 +94,10 @@ class CustomPOSConfig(models.Model):
         # Step 1: A-Trust Login & Certificate Info (Specific to starting receipt setup)
         try:
             _logger.info(f"RKSV: Attempting A-Trust login for POS '{pos_config_rec.name}'.")
-            a_trust_api_session = login(LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
-            signature_cert_info = get_certificate_information(pos_config_rec.a_trust_user_name)
+            base_path = pos_config_rec._get_a_trust_base_path()
+            _logger.info(f"RKSV: Using A-Trust base path: {base_path}")
+            a_trust_api_session = login(LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password), base_path)
+            signature_cert_info = get_certificate_information(pos_config_rec.a_trust_user_name, base_path)
             pos_config_rec.a_trust_session_id = a_trust_api_session.sessionId
             pos_config_rec.a_trust_session_key = a_trust_api_session.sessionKey
             pos_config_rec.pos_rksv_lock = True
@@ -113,56 +135,74 @@ class CustomPOSConfig(models.Model):
         # Step 4: Close Session
         pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
 
+    def _setup_cron_job(self):
+        for config in self:
+            _logger.info(f"RKSV: Creating/updating cron job for POS config '{config.name}' (ID: {config.id}).")
+            cron_name = f'POS: Create Nullbeleg for {config.name}'
+            cron = self.env['ir.cron'].sudo().search([('name', '=', cron_name)], limit=1)
+            if not cron:
+                cron = self.env['ir.cron'].sudo().create({
+                    'name': cron_name,
+                    'model_id': self.env.ref('point_of_sale.model_pos_config').id,
+                    'state': 'code',
+                    'code': f'model.browse({config.id})._cron_create_monthly_receipt()',
+                    'interval_number': 1,
+                    'interval_type': 'months',
+                    'user_id': self.env.user.id,
+                })
+            hour = int(config.monthly_nullbeleg_time)
+            minute = int((config.monthly_nullbeleg_time * 60) % 60)
+            today = fields.Date.today()
+            next_call_date = today + relativedelta(day=1, months=1)
+            last_day_of_month = next_call_date - timedelta(days=1)
+            cron.sudo().write({
+                'nextcall': last_day_of_month.strftime(f'%Y-%m-%d {hour:02d}:{minute:02d}:00'),
+            })
+
     def _cron_create_monthly_receipt(self):
-        active_rksv_configs = self.env['pos.config'].search([('pos_use_registrierkasse', '=', True)])
-        if not active_rksv_configs:
-            _logger.info("RKSV CRON: No active RKSV POS configurations found.")
+        if not self.exists() or not self.pos_use_registrierkasse:
+            _logger.warning(f"RKSV CRON: Attempted to run for non-existent or non-RKSV POS config (ID: {self.id}). Aborting.")
             return
 
-        for pos_config_rec in active_rksv_configs:
-            _logger.info(f"RKSV CRON: Processing POS Config '{pos_config_rec.name}' (ID: {pos_config_rec.id})")
-            pos_session = None  # Initialize for finally block
-            try:
-                # Step 1: Create Session & Order
-                pos_session = self._rksv_create_pos_session(pos_config_rec, "Monthly Null Receipt Session")
-                receipt_num = pos_config_rec.receipt_sequence_id.next_by_id()
-                order_date_obj = fields.Datetime.now()
+        _logger.info(f"RKSV CRON: Processing POS Config '{self.name}' (ID: {self.id})")
+        pos_session = None
+        try:
+            # Step 1: Create Session & Order
+            pos_session = self._rksv_create_pos_session(self, "Monthly Null Receipt Session")
+            receipt_num = self.receipt_sequence_id.next_by_id()
+            order_date_obj = fields.Datetime.now()
 
-                prev_rksv_order = self.env['pos.order'].search([
-                    ('config_id', '=', pos_config_rec.id),
-                    ('registrierkasse_receipt_number', '=', int(receipt_num) - 1),
-                    ('state', 'in', ['paid', 'done', 'invoiced'])
-                ], limit=1, order='registrierkasse_receipt_number desc, id desc')
-                prev_order_jws_hash_for_chaining = chain_hash(pos_config_rec, prev_rksv_order)
+            prev_rksv_order = self.env['pos.order'].search([
+                ('config_id', '=', self.id),
+                ('registrierkasse_receipt_number', '=', int(receipt_num) - 1),
+                ('state', 'in', ['paid', 'done', 'invoiced'])
+            ], limit=1, order='registrierkasse_receipt_number desc, id desc')
+            prev_order_jws_hash_for_chaining = chain_hash(self, prev_rksv_order)
 
-                order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
+            order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
 
-                order = self._rksv_create_null_order(
-                    pos_config_rec, pos_session, receipt_num, order_date_obj,
-                    prev_order_jws_hash_for_chaining, order_sequence_in_session)
-                order.action_pos_order_paid()
+            order = self._rksv_create_null_order(
+                self, pos_session, receipt_num, order_date_obj,
+                prev_order_jws_hash_for_chaining, order_sequence_in_session)
+            order.action_pos_order_paid()
 
-                # Step 2: Perform RKSV Signing
-                # For monthly receipt, prospective revenue is the current counter (since order amount is 0).
-                # JWS uses the calculated prev_order_jws_hash_for_chaining.
-                self._rksv_perform_order_signing(
-                    pos_config_rec, order,
-                    pos_config_rec.revenue_counter,  # Prospective revenue for encryption
-                    prev_order_jws_hash_for_chaining  # Previous hash for JWS payload
-                )
-                _logger.info(
-                    f"RKSV CRON: Monthly receipt (Order ID: {order.id}) for POS '{pos_config_rec.name}' signed.")
+            # Step 2: Perform RKSV Signing
+            self._rksv_perform_order_signing(
+                self, order,
+                self.revenue_counter,  # Prospective revenue for encryption
+                prev_order_jws_hash_for_chaining  # Previous hash for JWS payload
+            )
+            _logger.info(
+                f"RKSV CRON: Monthly receipt (Order ID: {order.id}) for POS '{self.name}' signed.")
 
-            except Exception as e:
-                _logger.error(f"RKSV CRON: Error processing POS Config '{pos_config_rec.name}': {e}", exc_info=True)
-                # Continue to the next POS config
-            finally:
-                # If a new session was created for this null receipt - it is closed here.
-                if (pos_session and pos_session.exists()
-                        and pos_session.name == f'Monthly Null Receipt Session - {pos_config_rec.name}'
-                        and pos_session.state != 'closed'):
-                    pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
-                    _logger.info(f"RKSV CRON: Closed POS Session (ID: {pos_session.id})")
+        except Exception as e:
+            _logger.error(f"RKSV CRON: Error processing POS Config '{self.name}': {e}", exc_info=True)
+        finally:
+            if (pos_session and pos_session.exists()
+                    and pos_session.name == f'Monthly Null Receipt Session - {self.name}'
+                    and pos_session.state != 'closed'):
+                pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
+                _logger.info(f"RKSV CRON: Closed POS Session (ID: {pos_session.id})")
 
     @api.model
     def write(self, vals):
@@ -171,6 +211,7 @@ class CustomPOSConfig(models.Model):
             for record in self:  # self can be multiple records in write
                 if not record.pos_rksv_lock:  # Check if already locked/initialized
                     self._create_starting_receipt(record)
+                    record._setup_cron_job()
         return res
 
     @api.onchange('pos_use_registrierkasse')
@@ -265,16 +306,18 @@ class CustomPOSConfig(models.Model):
 
 
         try:
-            actual_jws_signature = create_signature(a_trust_session_for_signing, machine_readable_code)
+            base_path = pos_config_rec._get_a_trust_base_path()
+            actual_jws_signature = create_signature(a_trust_session_for_signing, machine_readable_code, base_path)
         except PermissionError:
             _logger.warning(f"RKSV: A-Trust re-login needed during signing for POS '{pos_config_rec.name}'.")
+            base_path = pos_config_rec._get_a_trust_base_path()
             a_trust_api_session_retry = login(
-                LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
+                LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password), base_path)
             pos_config_rec.a_trust_session_key = a_trust_api_session_retry.sessionKey
             pos_config_rec.a_trust_session_id = a_trust_api_session_retry.sessionId
             a_trust_session_for_signing_retry = SessionData(a_trust_api_session_retry.sessionKey,
                                                             a_trust_api_session_retry.sessionId)
-            actual_jws_signature = create_signature(a_trust_session_for_signing_retry, machine_readable_code)
+            actual_jws_signature = create_signature(a_trust_session_for_signing_retry, machine_readable_code, base_path)
         except Exception as e:
             _logger.error(
                 f"RKSV CRITICAL: Failed to sign JWS for Order ID {order_rec.id} on POS '{pos_config_rec.name}': {e}",
