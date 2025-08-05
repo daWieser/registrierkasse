@@ -15,7 +15,7 @@
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Sales',
-    'version': '0.1',
+    'version': '0.2',
     'license': 'LGPL-3',
     'images': ['images/registrierkasse_thumbnail.png'],
 
@@ -30,6 +30,5 @@
     'data': [
         'views/pos_config.xml',
         'views/point_of_sale_dashboard.xml',
-        'data/monthly_nullbeleg_cron.xml',
     ],
 }

@@ -55,14 +55,8 @@ class CertificateInformation:
     signature_certificate: str
     certification_body: [str]
 
-basePath = "https://rksv.a-trust.at/asignrkonline/v2"
-
-#Test environment:
-# basePath = "https://hs-abnahme.a-trust.at/asignrkonline/v2"
-
-
-def login(user):
-    url = basePath + '/Session/' + user.username
+def login(user, base_path):
+    url = base_path + '/Session/' + user.username
     request_payload = {'password': user.password}
 
     response = put(url, json=request_payload)
@@ -72,8 +66,8 @@ def login(user):
     return SessionData(response_payload['sessionkey'], response_payload['sessionid'])
 
 
-def logout(session):
-    url = basePath + '/Session/' + session.sessionId
+def logout(session, base_path):
+    url = base_path + '/Session/' + session.sessionId
 
     response = delete(url)
     if response.status_code != 200:
@@ -81,13 +75,13 @@ def logout(session):
     return response
 
 
-def create_signature(session, machine_readable_code):
+def create_signature(session, machine_readable_code, base_path):
     jws_payload = base64.urlsafe_b64encode(bytes( machine_readable_code , 'utf-8') ).decode('utf-8').rstrip("=")
 
     to_be_signed = "eyJhbGciOiJFUzI1NiJ9" + '.' + jws_payload
     to_be_signed = base64.b64encode(bytes(to_be_signed, 'utf-8')).decode('ascii')
 
-    url = basePath + '/Session/' + session.sessionId + '/Sign'
+    url = base_path + '/Session/' + session.sessionId + '/Sign'
     payload = {
         "sessionkey": session.sessionKey,
         "to_be_signed": to_be_signed,
@@ -103,8 +97,8 @@ def create_signature(session, machine_readable_code):
     return response.json()['signature']
 
 
-def get_certificate_information(username):
-    url = basePath + '/' + username + '/Certificates'
+def get_certificate_information(username, base_path):
+    url = base_path + '/' + username + '/Certificates'
     response = get(url)
 
     if response.status_code == 401:
