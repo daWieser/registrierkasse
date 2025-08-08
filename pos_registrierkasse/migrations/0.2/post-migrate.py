@@ -10,5 +10,5 @@ def migrate(cr, version):
     _logger.info(f"RKSV: Found {len(configs)} RKSV-enabled POS configs to process.")
     for config in configs:
         _logger.info(f"RKSV: Creating/updating cron job for POS config '{config.name}' (ID: {config.id}).")
-        config._create_cron_job()
+        config._setup_cron_job()
     _logger.info("RKSV: Finished migration script for version 0.2.")
