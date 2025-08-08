@@ -1,12 +1,10 @@
 <section class="oe_container">
     <div class="oe_row oe_spaced">
         <h2 class="oe_slogan">RKSV-compliant Open Source Cash Register</h2>
-        <div class="oe_demo oe_screenshot">
-            <p align="center">
-                <img src="icon.png" alt="RKSV-compliant Open Source Cash Register Logo" style="max-height: 250px;">
-            </p>
-        </div>
-        <p>Open source Odoo addon, to enable RKSV compliance in Odoo POS.</p>
+        <p align="center">Open source Odoo addon, to enable RKSV compliance in Odoo POS.</p>
+        <p align="center">
+            <img src="icon.png" alt="RKSV-compliant Open Source Cash Register Logo" style="max-height: 250px;">
+        </p>
     </div>
 </section>
 
@@ -14,12 +12,24 @@
     <div class="oe_row oe_spaced">
         <h2 class="oe_slogan">Features</h2>
         <ul>
-            <li><strong>RKSV Compliance:</strong> Enables your Odoo Point of Sale (POS) to comply with Austrian Registrierkassenpflicht (RKSV) regulations.</li>
-            <li><strong>Automated Startbeleg Creation:</strong> Automatically generates the initial "Startbeleg" (starting receipt) when a POS is configured for RKSV.</li>
-            <li><strong>Configurable A-Trust API Environment:</strong> Allows selection between Test and Production environments for A-Trust API communication directly from POS settings.</li>
-            <li><strong>Automated Nullbeleg Generation:</strong> Automatically creates monthly Nullbeleg receipts as required by law.</li>
-            <li><strong>Stornobeleg Creation:</strong> Supports the creation of Stornobelege (cancellation receipts) for RKSV compliance.</li>
-            <li><strong>Datenerfassungsprotokoll Export:</strong> Enables the export of the "Datenerfassungsprotokoll" (data capture protocol) for quarterly backups.</li>
+            <li><strong>RKSV Compliance:</strong> Enables your Odoo Point of Sale (POS) to comply with Austrian
+                Registrierkassenpflicht (RKSV) regulations.
+            </li>
+            <li><strong>Automated Startbeleg Creation:</strong> Automatically generates the initial "Startbeleg"
+                (starting receipt) when a POS is configured for RKSV.
+            </li>
+            <li><strong>Configurable A-Trust API Environment:</strong> Allows selection between Test and Production
+                environments for A-Trust API communication directly from POS settings.
+            </li>
+            <li><strong>Automated Nullbeleg Generation:</strong> Automatically creates monthly Nullbeleg receipts as
+                required by law.
+            </li>
+            <li><strong>Stornobeleg Creation:</strong> Supports the creation of Stornobelege (cancellation receipts) for
+                RKSV compliance.
+            </li>
+            <li><strong>Datenerfassungsprotokoll Export:</strong> Enables the export of the "Datenerfassungsprotokoll"
+                (data capture protocol) for quarterly backups.
+            </li>
         </ul>
     </div>
 </section>
@@ -28,20 +38,30 @@
     <div class="oe_row oe_spaced">
         <h2 class="oe_slogan">How to Use</h2>
         <h3>Enable RKSV Compliance on your POS</h3>
-        <p>To comply with Austrian law, a signature certificate from A-Trust is required. This certificate can be obtained from <a href="mailto:office@vorstieg.eu">office@vorstieg.eu</a>.</p>
-        <p>Upon saving the POS with RKSV enabled, a Startbeleg is automatically created and can be registered using the "BMF Belegchek" app.</p>
-        <div class="oe_demo oe_screenshot">
-            <img src="rksv_1.png" alt="screenshot RKSV settings">
+        <p>To comply with Austrian law, a signature certificate from A-Trust is required. This certificate can be
+            obtained from <a href="mailto:office@vorstieg.eu">office@vorstieg.eu</a>.</p>
+        <p>Upon saving the POS with RKSV enabled, a Startbeleg is automatically created and can be registered using the
+            "BMF Belegchek" app.</p>
+        <div class="mb-4">
+            <img style="max-width: 100%" src="rksv_1.png" alt="screenshot RKSV settings">
         </div>
 
         <h3>RKSV Configuration Options</h3>
         <ul>
             <li><strong>A-Trust User Name:</strong> The username for authenticating with the A-Trust API.</li>
             <li><strong>A-Trust Password:</strong> The password for authenticating with the A-Trust API.</li>
-            <li><strong>Umsatzzähler AES (AES Key):</strong> An automatically generated AES key used for encrypting the revenue counter. This key must be registered with Finanzonline.</li>
-            <li><strong>Umsatzzähler AES Prüfsumme (AES Key Checksum):</strong> A checksum for the generated AES key, used for verification.</li>
-            <li><strong>A-Trust Environment:</strong> Select between Test or Production environments for A-Trust API communication.</li>
-            <li><strong>Time for Nullbeleg:</strong> Specify the time of day for the monthly Nullbeleg cron job, which runs on the last day of each month.</li>
+            <li><strong>Umsatzzähler AES (AES Key):</strong> An automatically generated AES key used for encrypting the
+                revenue counter. This key must be registered with Finanzonline.
+            </li>
+            <li><strong>Umsatzzähler AES Prüfsumme (AES Key Checksum):</strong> A checksum for the generated AES key,
+                used for verification.
+            </li>
+            <li><strong>A-Trust Environment:</strong> Select between Test or Production environments for A-Trust API
+                communication.
+            </li>
+            <li><strong>Time for Nullbeleg:</strong> Specify the time of day for the monthly Nullbeleg cron job, which
+                runs on the last day of each month.
+            </li>
         </ul>
     </div>
 </section>
@@ -49,21 +69,26 @@
 <section class="oe_container oe_dark">
     <div class="oe_row oe_spaced">
         <h2 class="oe_slogan">Nullbeleg</h2>
-        <p>When the RKSV option is enabled on any POS, a Nullbelegprodukt is automatically created. This product is essential for the Startbeleg, as well as for the monthly and yearly end receipts.</p>
-        <p>In situations where an officer of the financial police inspects the POS, it is necessary to create an empty receipt using this product.</p>
-        <div class="oe_demo oe_screenshot">
-            <img src="rksv_2.png" alt="screenshot with Nullbeleg">
+        <p>When the RKSV option is enabled on any POS, a Nullbelegprodukt is automatically created. This product is
+            essential for the Startbeleg, as well as for the monthly and yearly end receipts.</p>
+        <p>In situations where an officer of the financial police inspects the POS, it is necessary to create an empty
+            receipt using this product.</p>
+        <div class="mb-4">
+            <img style="max-width: 100%" src="rksv_2.png" alt="screenshot with Nullbeleg">
         </div>
-        <p>An automated task (cron job) is included in this module to create the monthly Nullbeleg. It is highly recommended to configure this job to run during non-business hours to avoid interfering with active POS sessions.</p>
+        <p>An automated task (cron job) is included in this module to create the monthly Nullbeleg. It is highly
+            recommended to configure this job to run during non-business hours to avoid interfering with active POS
+            sessions.</p>
     </div>
 </section>
 
 <section class="oe_container">
     <div class="oe_row oe_spaced">
         <h2 class="oe_slogan">Datenerfassungsprotokoll</h2>
-        <p>According to Austrian law, all receipts must be exported and backed up once per quarter. This can be done by exporting the Datenerfassungsprotokoll for each POS.</p>
-        <div class="oe_demo oe_screenshot">
-            <img src="rksv_3.png" alt="screenshot with Datenerfassungsprotokoll">
+        <p>According to Austrian law, all receipts must be exported and backed up once per quarter. This can be done by
+            exporting the Datenerfassungsprotokoll for each POS.</p>
+        <div class="mb-4">
+            <img style="max-width: 100%" src="rksv_3.png" alt="screenshot with Datenerfassungsprotokoll">
         </div>
     </div>
 </section>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="https://finanzonline.bmf.gv.at/rkdb" xmlns="https://finanzonline.bmf.gv.at/rkdb">
+	<xs:element name="verificationResultList">
+		<xs:complexType>
+		<xs:sequence>
+		<xs:element maxOccurs="unbounded" minOccurs="0" ref="verificationResult"/>
+		</xs:sequence>
+		</xs:complexType>	
+	</xs:element>
+
+	<xs:element name="verificationResult">
+		<xs:complexType>
+		<xs:sequence>
+			<xs:element name="verificationId" type="xs:string"/>
+			<xs:element name="version" type="xs:integer"/>	
+			<xs:element name="verificationName" type="xs:string"/>
+			<xs:element minOccurs="0" name="verificationTextualDescription" type="xs:string"/>
+			<xs:element ref="verificationState"/>
+			<xs:element minOccurs="0" name="verificationResultDetailedMessage" type="xs:string"/>
+			<xs:element minOccurs="0" ref="input"/>
+			<xs:element minOccurs="0" ref="output"/>
+			<xs:element name="verificationTimestamp" type="xs:dateTime"/>
+			<xs:element minOccurs="0" ref="verificationResultList"/>
+		</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="verificationState">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="PASS"/>
+				<xs:enumeration value="FAIL"/>
+				<xs:enumeration value="NOT_EXECUTED"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="input">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:any maxOccurs="unbounded" processContents="lax"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="output">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:any maxOccurs="unbounded" processContents="lax"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

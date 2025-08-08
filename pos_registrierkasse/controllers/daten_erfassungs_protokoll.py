@@ -6,7 +6,7 @@ import pytz
 from odoo import http
 from odoo.http import request, content_disposition
 
-from odoo.addons.pos_registrierkasse.models.utils.a_trust_library import OrderData
+from odoo.addons.pos_registrierkasse.models.libs.a_trust.a_trust_library import OrderData
 
 from odoo.addons.pos_registrierkasse.models.utils.order_utils import jws_signature_compact
 

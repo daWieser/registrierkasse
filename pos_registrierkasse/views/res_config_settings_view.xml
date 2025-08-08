@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.pos.registrierkasse</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//block[@id='pos_accounting_section']" position="after">
+                    <block title="FinanzOnline (Austria)" id="pos_registrierkasse_section">
+                        <setting string="Activate FinanzOnline-Integration">
+                            <field name="fon_active"/>
+                            <div class="content-group" invisible="fon_active == False">
+                                <div class="text-muted mb16">
+                                    Credentials for the Austrian FinanzOnline web service. These settings are global for all PoS.
+                                </div>
+
+                                <div class="row mt16">
+                                    <label for="fon_environment" string="FinanzOnline Environment" class="col-lg-4 o_light_label"/>
+                                    <field name="fon_environment" widget="radio"/>
+                                </div>
+                                <div class="row mt16">
+                                    <label for="fon_tid" string="Participant ID" class="col-lg-4 o_light_label"/>
+                                    <field name="fon_tid"/>
+                                </div>
+                                <div class="row">
+                                    <label for="fon_benid" string="User ID" class="col-lg-4 o_light_label"/>
+                                    <field name="fon_benid"/>
+                                </div>
+                                <div class="row">
+                                    <label for="fon_pin" string="Pin" class="col-lg-4 o_light_label"/>
+                                    <field name="fon_pin" password="True"/>
+                                </div>
+                                <div class="row">
+                                    <label for="fon_herstellerid" string="Supplier ID" class="col-lg-4 o_light_label"/>
+                                    <field name="fon_herstellerid"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

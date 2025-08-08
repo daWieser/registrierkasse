@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="https://finanzonline.bmf.gv.at/rkdb" xmlns="https://finanzonline.bmf.gv.at/rkdb">
+	<xs:include schemaLocation="regKasse.xsd"/>
+	<xs:include schemaLocation="verification.xsd"/>
+	<xs:element name="rkdbRequest">		
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="tid"/>
+				<xs:element ref="benid"/>
+				<xs:element ref="id"/>
+				<xs:element ref="art_uebermittlung"/>
+				<xs:element minOccurs="0" ref="erzwinge_asynchron"/>
+				<xs:choice>
+					<xs:element ref="status_kasse"/>
+					<xs:element ref="status_see"/>
+					<xs:element ref="status_ggs"/>
+					<xs:element ref="rkdb"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="rkdbResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" ref="fastnr"/>
+				<xs:element ref="paket_nr"/>
+				<xs:element minOccurs="0" ref="art_uebermittlung"/>				
+				<xs:element ref="ts_erstellung"/>	
+				<xs:element minOccurs="0" ref="info"/>
+				<xs:element maxOccurs="unbounded" ref="result"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="result">		
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>				
+				<xs:element maxOccurs="unbounded" ref="rkdbMessage"/>
+				<xs:element minOccurs="0" ref="verificationResultList"/>
+				<xs:element minOccurs="0" ref="abfrage_ergebnis"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="rkdbMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="rc"/>
+				<xs:element ref="msg"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="rc">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="12"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="info" type="xs:string"/>
+	<xs:element name="msg" type="xs:string"/>
+	<xs:element name="id">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="50"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="tid">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="8"/>
+				<xs:maxLength value="12"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="benid">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="5"/>
+				<xs:maxLength value="12"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="art_uebermittlung">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="T"/>
+				<xs:enumeration value="P"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>	
+	<xs:element name="erzwinge_asynchron">
+		<xs:simpleType>
+			<xs:restriction base="xs:boolean"/>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="status_kasse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" ref="fastnr"/>
+				<xs:element ref="paket_nr"/>
+				<xs:element ref="ts_erstellung"/>
+				<xs:element ref="satznr"/>
+				<xs:element ref="kassenidentifikationsnummer"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="status_see">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" ref="fastnr"/>
+				<xs:element ref="paket_nr"/>
+				<xs:element ref="ts_erstellung"/>
+				<xs:element ref="satznr"/>
+				<xs:element ref="zertifikatsseriennummer"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="status_ggs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" ref="fastnr"/>
+				<xs:element ref="paket_nr"/>
+				<xs:element ref="ts_erstellung"/>
+				<xs:element ref="satznr"/>
+				<xs:element ref="art_ob"/>
+				<xs:element ref="ob"/>
+				<xs:element minOccurs="0" ref="zusatz_ob"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="abfrage_ergebnis">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ts_registrierung">
+					<xs:simpleType>
+						<xs:restriction base="xs:dateTime"/>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="status">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="AKTIVIERT"/>
+							<xs:enumeration value="REGISTRIERT"/>
+							<xs:enumeration value="IN_BETRIEB"/>
+							<xs:enumeration value="AUSFALL"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ts_status">
+					<xs:simpleType>
+						<xs:restriction base="xs:dateTime"/>
+					</xs:simpleType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

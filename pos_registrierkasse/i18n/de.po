@@ -1,0 +1,76 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * pos_registrierkasse
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0alpha1
+"
+"Report-Msgid-Bugs-To: 
+"
+"POT-Creation-Date: 2025-08-07 17:00+0000
+"
+"PO-Revision-Date: 2025-08-07 17:00+0000
+"
+"Last-Translator: 
+"
+"Language-Team: 
+"
+"MIME-Version: 1.0
+"
+"Content-Type: text/plain; charset=UTF-8
+"
+"Content-Transfer-Encoding: 8bit
+"
+"X-Generator: Odoo
+"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "FinanzOnline (Austria)"
+msgstr "FinanzOnline (Österreich)"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "FinanzOnline Credentials"
+msgstr "FinanzOnline Zugangsdaten"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Credentials for the Austrian FinanzOnline web service. These settings are global for all PoS."
+msgstr "Zugangsdaten für den österreichischen FinanzOnline Webservice. Diese Einstellungen sind global für alle PoS."
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "FinanzOnline Environment"
+msgstr "FinanzOnline Umgebung"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Test Environment"
+msgstr "Test Umgebung"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Production Environment"
+msgstr "Produktions Umgebung"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Participant ID"
+msgstr "Teilnehmer ID"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "User ID"
+msgstr "Benutzer ID"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Pin"
+msgstr "Pin"
+
+#. module: pos_registrierkasse
+#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Supplier ID"
+msgstr "Hersteller ID"

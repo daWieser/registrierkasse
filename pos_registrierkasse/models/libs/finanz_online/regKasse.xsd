@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="https://finanzonline.bmf.gv.at/rkdb" xmlns="https://finanzonline.bmf.gv.at/rkdb">
+	<xs:element name="rkdb">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" ref="fastnr"/>
+				<xs:element ref="paket_nr"/>
+				<xs:element ref="ts_erstellung"/>
+				<xs:choice>
+					<xs:element maxOccurs="2000" ref="registrierung_se"/>
+					<xs:element maxOccurs="4000" ref="registrierung_kasse"/>
+					<xs:element maxOccurs="2000" ref="registrierung_ggs"/>
+					<xs:element maxOccurs="4000" ref="ausfall_se"/>
+					<xs:element maxOccurs="4000" ref="wiederinbetriebnahme_se"/>
+					<xs:element maxOccurs="4000" ref="ausfall_kasse"/>
+					<xs:element maxOccurs="4000" ref="wiederinbetriebnahme_kasse"/>
+					<xs:element maxOccurs="4000" ref="ausfall_ggs"/>
+					<xs:element maxOccurs="4000" ref="wiederinbetriebnahme_ggs"/>
+					<xs:element ref="belegpruefung"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="registrierung_se">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="art_se"/>
+				<xs:element ref="vda_id"/>
+				<xs:choice>
+					<xs:element ref="zertifikatsseriennummer"/>
+					<xs:element ref="zertifikat"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="registrierung_kasse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="kassenidentifikationsnummer"/>
+				<xs:element minOccurs="0" ref="anmerkung"/>
+				<xs:element ref="benutzerschluessel"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="registrierung_ggs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="art_ob"/>
+				<xs:element ref="ob"/>
+				<xs:element minOccurs="0" ref="zusatz_ob"/>
+				<xs:element ref="art_se_ggs"/>
+				<xs:choice>
+					<xs:element ref="public_key"/>
+					<xs:element ref="zertifikat"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ausfall_se">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="zertifikatsseriennummer"/>
+				<xs:choice>
+					<xs:element ref="ausfall"/>
+					<xs:element ref="ausserbetriebnahme"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="wiederinbetriebnahme_se">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="zertifikatsseriennummer"/>
+				<xs:element ref="ende_ausfall"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ausfall_kasse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="kassenidentifikationsnummer"/>
+				<xs:choice>
+					<xs:element ref="ausfall"/>
+					<xs:element ref="ausserbetriebnahme"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="wiederinbetriebnahme_kasse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="kassenidentifikationsnummer"/>
+				<xs:element ref="ende_ausfall"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ausfall_ggs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="art_ob"/>
+				<xs:element ref="ob"/>
+				<xs:element minOccurs="0" ref="zusatz_ob"/>
+				<xs:choice>
+					<xs:element ref="ausfall"/>
+					<xs:element ref="ausserbetriebnahme"/>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="wiederinbetriebnahme_ggs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="art_ob"/>
+				<xs:element ref="ob"/>
+				<xs:element minOccurs="0" ref="zusatz_ob"/>
+				<xs:element ref="ende_ausfall"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="fastnr">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="9"/>
+				<xs:maxLength value="9"/>
+				<xs:pattern value="[0-9]{9}"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="paket_nr">
+		<xs:simpleType>
+			<xs:restriction base="xs:positiveInteger">
+				<xs:minInclusive value="1"/>
+				<xs:maxInclusive value="999999999"/>
+				<xs:totalDigits value="9"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="satznr">
+		<xs:simpleType>
+			<xs:restriction base="xs:positiveInteger">
+				<xs:minInclusive value="1"/>
+				<xs:maxInclusive value="999999999"/>
+				<xs:totalDigits value="9"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="ts_erstellung">
+		<xs:simpleType>
+			<xs:restriction base="xs:dateTime"/>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="kundeninfo">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="50"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="art_se">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="SIGNATURKARTE"/>
+				<xs:enumeration value="EIGENES_HSM"/>
+				<xs:enumeration value="HSM_DIENSTLEISTER"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="art_se_ggs">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="EIGENES_HSM"/>
+				<xs:enumeration value="SW_GGS"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="art_ob">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="UID"/>
+				<xs:enumeration value="GLN"/>
+				<xs:enumeration value="FASTNR"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="ob">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="14"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="zusatz_ob">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="10"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="vda_id">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="3"/>
+				<xs:maxLength value="4"/>
+				<xs:pattern value="[A-Z]{2}[1-9][0-9]{0,1}"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="zertifikatsseriennummer">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="seriennummerType">
+					<xs:attribute name="hex" type="xs:boolean" use="optional"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="seriennummerType">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="50"/>
+			<xs:pattern value="[0-9A-Fa-f]+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="zertifikat">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:pattern value="[\n 0-9a-zA-Z+/=]+"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="public_key">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:pattern value="[\n\- 0-9a-zA-Z+/=]+"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="kassenidentifikationsnummer">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="50"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="anmerkung">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="256"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="ausfall">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="begruendung"/>
+				<xs:element ref="beginn_ausfall"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ausserbetriebnahme">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="begruendung"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="begruendung">
+		<xs:simpleType>
+			<xs:restriction base="xs:int">
+				<xs:minInclusive value="1"/>
+				<xs:maxInclusive value="99"/>
+				<xs:totalDigits value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="benutzerschluessel">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:length value="44"/>
+				<xs:pattern value="[0-9a-zA-Z+/=]{44}"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="beginn_ausfall" type="xs:dateTime"/>
+	<xs:element name="ende_ausfall" type="xs:dateTime"/>
+	<xs:element name="belegpruefung">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="satznr"/>
+				<xs:element minOccurs="0" ref="kundeninfo"/>
+				<xs:element ref="beleg"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="beleg">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="100"/>
+				<xs:maxLength value="1000"/>
+				<xs:pattern value="(_[^_]+){13}"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+</xs:schema>
