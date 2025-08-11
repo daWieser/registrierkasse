@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta, date
 
-from .utils.a_trust_library import SessionData, OrderData, create_signature, login, LoginData, get_certificate_information
+from .utils.a_trust_library import SessionData, OrderData, LoginData, get_atrust_api
 from .utils.order_utils import chain_hash, hash_signature, format_order_date, base64url_to_base64
 from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
@@ -45,11 +45,8 @@ class CustomPOSConfig(models.Model):
         default='production'
     )
 
-    def _get_a_trust_base_path(self):
-        if self.a_trust_environment == 'production':
-            return "https://rksv.a-trust.at/asignrkonline/v2"
-        else:
-            return "https://hs-abnahme.a-trust.at/asignrkonline/v2"
+    def get_atrust_provider(self):
+        return get_atrust_api(self.a_trust_environment == 'test')
 
     def copy(self, default=None):
         raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
@@ -94,10 +91,10 @@ class CustomPOSConfig(models.Model):
         # Step 1: A-Trust Login & Certificate Info (Specific to starting receipt setup)
         try:
             _logger.info(f"RKSV: Attempting A-Trust login for POS '{pos_config_rec.name}'.")
-            base_path = pos_config_rec._get_a_trust_base_path()
-            _logger.info(f"RKSV: Using A-Trust base path: {base_path}")
-            a_trust_api_session = login(LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password), base_path)
-            signature_cert_info = get_certificate_information(pos_config_rec.a_trust_user_name, base_path)
+            atrust_api = pos_config_rec.get_atrust_provider()
+            a_trust_api_session = atrust_api.login(
+                LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
+            signature_cert_info = atrust_api.get_certificate_information(pos_config_rec.a_trust_user_name)
             pos_config_rec.a_trust_session_id = a_trust_api_session.sessionId
             pos_config_rec.a_trust_session_key = a_trust_api_session.sessionKey
             pos_config_rec.pos_rksv_lock = True
@@ -306,18 +303,18 @@ class CustomPOSConfig(models.Model):
 
 
         try:
-            base_path = pos_config_rec._get_a_trust_base_path()
-            actual_jws_signature = create_signature(a_trust_session_for_signing, machine_readable_code, base_path)
+            atrust_api = pos_config_rec.get_atrust_provider()
+            actual_jws_signature = atrust_api.create_signature(a_trust_session_for_signing, machine_readable_code)
         except PermissionError:
             _logger.warning(f"RKSV: A-Trust re-login needed during signing for POS '{pos_config_rec.name}'.")
-            base_path = pos_config_rec._get_a_trust_base_path()
-            a_trust_api_session_retry = login(
-                LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password), base_path)
+            atrust_api = pos_config_rec.get_atrust_provider()
+            a_trust_api_session_retry = atrust_api.login(
+                LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
             pos_config_rec.a_trust_session_key = a_trust_api_session_retry.sessionKey
             pos_config_rec.a_trust_session_id = a_trust_api_session_retry.sessionId
             a_trust_session_for_signing_retry = SessionData(a_trust_api_session_retry.sessionKey,
                                                             a_trust_api_session_retry.sessionId)
-            actual_jws_signature = create_signature(a_trust_session_for_signing_retry, machine_readable_code, base_path)
+            actual_jws_signature = atrust_api.create_signature(a_trust_session_for_signing_retry, machine_readable_code)
         except Exception as e:
             _logger.error(
                 f"RKSV CRITICAL: Failed to sign JWS for Order ID {order_rec.id} on POS '{pos_config_rec.name}': {e}",
