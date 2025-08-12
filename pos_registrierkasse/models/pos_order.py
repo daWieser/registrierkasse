@@ -1,7 +1,7 @@
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
-from .utils.a_trust_library import SessionData, OrderData, LoginData, create_signature, login
+from .utils.a_trust_library import SessionData, OrderData, LoginData
 from .utils.order_utils import chain_hash, format_order_date, base64url_to_base64
 from .utils.revenue_counter import encrypt_revenue_counter
 
@@ -69,18 +69,18 @@ class CustomPOSOrder(models.Model):
         ).parse()
 
         try:
-            base_path = config._get_a_trust_base_path()
+            atrust_api = config.get_atrust_provider()
             a_trust_session_data_obj = SessionData(config.a_trust_session_key, config.a_trust_session_id)
-            order_signature = create_signature(a_trust_session_data_obj, machine_readable_code, base_path)
+            order_signature = atrust_api.create_signature(a_trust_session_data_obj, machine_readable_code)
         except PermissionError:
-            base_path = config._get_a_trust_base_path()
-            a_trust_login_session = login(LoginData(config.a_trust_user_name, config.a_trust_password), base_path)
+            atrust_api = config.get_atrust_provider()
+            a_trust_login_session = atrust_api.login(LoginData(config.a_trust_user_name, config.a_trust_password))
             config.write({
                 'a_trust_session_key': a_trust_login_session.sessionKey,
                 'a_trust_session_id': a_trust_login_session.sessionId
             })
             a_trust_session_data_obj_retry = SessionData(a_trust_login_session.sessionKey, a_trust_login_session.sessionId)
-            order_signature = create_signature(a_trust_session_data_obj_retry, machine_readable_code, base_path)
+            order_signature = atrust_api.create_signature(a_trust_session_data_obj_retry, machine_readable_code)
 
         machine_readable_code += '_' + base64url_to_base64(order_signature)
 

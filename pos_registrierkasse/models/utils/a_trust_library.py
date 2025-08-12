@@ -1,8 +1,9 @@
 import unittest
 import base64
 from dataclasses import dataclass
-
+from abc import ABC, abstractmethod
 from requests import get, put, post, delete
+
 
 @dataclass()
 class SessionData:
@@ -49,66 +50,111 @@ class OrderData:
     def _format_number(self, value):
         return "{:.2f}".format(value).replace(".", ",")
 
+
 @dataclass()
 class CertificateInformation:
     certificate_serial_number: str
     signature_certificate: str
     certification_body: [str]
 
-def login(user, base_path):
-    url = base_path + '/Session/' + user.username
-    request_payload = {'password': user.password}
 
-    response = put(url, json=request_payload)
-    if response.status_code != 200:
-        raise Exception("Couldn't login to " + url)
-    response_payload = response.json()
-    return SessionData(response_payload['sessionkey'], response_payload['sessionid'])
+class ATrustProvider(ABC):
+    @abstractmethod
+    def login(self, user: LoginData) -> SessionData:
+        pass
 
+    @abstractmethod
+    def logout(self, session: SessionData):
+        pass
 
-def logout(session, base_path):
-    url = base_path + '/Session/' + session.sessionId
+    @abstractmethod
+    def create_signature(self, session: SessionData, machine_readable_code: str) -> str:
+        pass
 
-    response = delete(url)
-    if response.status_code != 200:
-        raise Exception("Couldn't logout from " + url)
-    return response
-
-
-def create_signature(session, machine_readable_code, base_path):
-    jws_payload = base64.urlsafe_b64encode(bytes( machine_readable_code , 'utf-8') ).decode('utf-8').rstrip("=")
-
-    to_be_signed = "eyJhbGciOiJFUzI1NiJ9" + '.' + jws_payload
-    to_be_signed = base64.b64encode(bytes(to_be_signed, 'utf-8')).decode('ascii')
-
-    url = base_path + '/Session/' + session.sessionId + '/Sign'
-    payload = {
-        "sessionkey": session.sessionKey,
-        "to_be_signed": to_be_signed,
-    }
-
-    response = post(url, json=payload)
-
-    if response.status_code == 401:
-        raise PermissionError("Please log in ")
-
-    if response.status_code != 200:
-        raise Exception("got the following error from signature: " + str(response.status_code))
-    return response.json()['signature']
+    @abstractmethod
+    def get_certificate_information(self, username: str) -> CertificateInformation:
+        pass
 
 
-def get_certificate_information(username, base_path):
-    url = base_path + '/' + username + '/Certificates'
-    response = get(url)
+class ATrustProdProvider(ATrustProvider):
+    BASE_PATH = "https://rksv.a-trust.at/asignrkonline/v2"
 
-    if response.status_code == 401:
-        raise PermissionError("Please log in ")
+    def login(self, user):
+        url = self.BASE_PATH + '/Session/' + user.username
+        request_payload = {'password': user.password}
 
-    if response.status_code != 200:
-        raise Exception("got the following error from signature: " + str(response.status_code))
-    certificate = response.json()['Signaturzertifikate'][0]
-    return CertificateInformation(certificate['ZertifikatsseriennummerHex'], certificate['Signaturzertifikat'],
-                                  certificate['Zertifizierungsstellen'])
+        response = put(url, json=request_payload)
+        if response.status_code != 200:
+            raise Exception("Couldn't login to " + url)
+        response_payload = response.json()
+        return SessionData(response_payload['sessionkey'], response_payload['sessionid'])
+
+    def logout(self, session):
+        url = self.BASE_PATH + '/Session/' + session.sessionId
+
+        response = delete(url)
+        if response.status_code != 200:
+            raise Exception("Couldn't logout from " + url)
+        return response
+
+    def create_signature(self, session, machine_readable_code):
+        jws_payload = base64.urlsafe_b64encode(bytes(machine_readable_code, 'utf-8')).decode('utf-8').rstrip("=")
+
+        to_be_signed = "eyJhbGciOiJFUzI1NiJ9" + '.' + jws_payload
+        to_be_signed = base64.b64encode(bytes(to_be_signed, 'utf-8')).decode('ascii')
+
+        url = self.BASE_PATH + '/Session/' + session.sessionId + '/Sign'
+        payload = {
+            "sessionkey": session.sessionKey,
+            "to_be_signed": to_be_signed,
+        }
+
+        response = post(url, json=payload)
+
+        if response.status_code == 401:
+            raise PermissionError("Please log in ")
+
+        if response.status_code != 200:
+            raise Exception("got the following error from signature: " + str(response.status_code))
+        return response.json()['signature']
+
+    def get_certificate_information(self, username):
+        url = self.BASE_PATH + '/' + username + '/Certificates'
+        response = get(url)
+
+        if response.status_code == 401:
+            raise PermissionError("Please log in ")
+
+        if response.status_code != 200:
+            raise Exception("got the following error from signature: " + str(response.status_code))
+        certificate = response.json()['Signaturzertifikate'][0]
+        return CertificateInformation(certificate['ZertifikatsseriennummerHex'], certificate['Signaturzertifikat'],
+                                      certificate['Zertifizierungsstellen'])
+
+
+class ATrustMockProvider(ATrustProvider):
+    def login(self, user):
+        return SessionData('mock_session_key', 'mock_session_id')
+
+    def logout(self, session):
+        return True
+
+    def create_signature(self, session, machine_readable_code):
+        return "mock_signature_string"
+
+    def get_certificate_information(self, username):
+        return CertificateInformation(
+            certificate_serial_number='mock_serial_number',
+            signature_certificate='mock_signature_certificate',
+            certification_body=['mock_certification_body']
+        )
+
+
+def get_atrust_api(is_test_env):
+    if is_test_env:
+        return ATrustMockProvider()
+    else:
+        return ATrustProdProvider()
 
 
 class PosUtilsTest(unittest.TestCase):
