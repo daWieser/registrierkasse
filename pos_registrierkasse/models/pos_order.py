@@ -91,7 +91,6 @@ class CustomPOSOrder(models.Model):
             'certificate_serial_number': config.certificate_serial_number,
             'prev_order_signature': prev_order_signature,
             'registrierkasse_receipt_number': receipt_number,
-            'rksv_signed': True
         }
 
     @api.model
@@ -139,7 +138,7 @@ class CustomPOSOrder(models.Model):
         refund_orders = super()._refund()
 
         for order in self:
-            refund_order = refund_orders.filtered(lambda r: r.refunded_order_ids == order)
+            refund_order = refund_orders.filtered(lambda r: r.refunded_order_id == order)
             if not refund_order:
                 continue
 
