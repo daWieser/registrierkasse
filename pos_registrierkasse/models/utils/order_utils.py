@@ -4,7 +4,8 @@ from hashlib import sha256
 from unittest.mock import MagicMock
 from datetime import datetime
 import pytz
-from .a_trust_library import OrderData
+
+from odoo.addons.pos_registrierkasse.models.libs.a_trust.a_trust_library import OrderData
 
 
 def chain_hash(config, order):

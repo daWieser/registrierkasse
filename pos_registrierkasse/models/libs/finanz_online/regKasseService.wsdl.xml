@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><definitions xmlns="http://schemas.xmlsoap.org/wsdl/" name="rkdbService" targetNamespace="https://finanzonline.bmf.gv.at/rkdb" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="https://finanzonline.bmf.gv.at/rkdb" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <types>
+        <xsd:schema>
+			<xsd:import namespace="https://finanzonline.bmf.gv.at/rkdb" schemaLocation="regKasseWs.xsd"/>
+		</xsd:schema>
+  </types>
+  
+  <message name="rkdbRequest">
+    <part element="tns:rkdbRequest" name="rkdbRequest"/>
+  </message>
+  <message name="rkdbResponse">
+    <part element="tns:rkdbResponse" name="rkdbResponse"/>
+  </message>
+  
+  <portType name="rkdbServicePort">
+    <operation name="rkdb">
+      <input message="tns:rkdbRequest" name="rkdbRequest"/>
+      <output message="tns:rkdbResponse" name="rkdbResponse"/>
+    </operation>
+  </portType>
+  
+  <binding name="rkdbServiceBinding" type="tns:rkdbServicePort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="rkdb">
+      <soap:operation soapAction="rkdb"/>
+      <input name="rkdbRequest">
+        <soap:body use="literal"/>
+      </input>
+      <output name="rkdbResponse">
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  
+  
+  <service name="rkdbService">
+    <port binding="tns:rkdbServiceBinding" name="rkdb">
+      <soap:address location="https://finanzonline.bmf.gv.at:443/fonws/ws/rkdb"/>
+    </port>
+  </service>
+</definitions>

@@ -1,7 +1,7 @@
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
-from .utils.a_trust_library import SessionData, OrderData, LoginData
+from .libs.a_trust.a_trust_library import SessionData, OrderData, LoginData
 from .utils.order_utils import chain_hash, format_order_date, base64url_to_base64
 from .utils.revenue_counter import encrypt_revenue_counter
 

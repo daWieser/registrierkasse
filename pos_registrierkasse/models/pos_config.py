@@ -1,12 +1,13 @@
 import json
 import logging
-from base64 import urlsafe_b64encode
 from odoo import api, models, fields
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
-from datetime import timedelta, date
+from datetime import timedelta
+import pytz
 
-from .utils.a_trust_library import SessionData, OrderData, LoginData, get_atrust_api
+from .libs.a_trust.a_trust_library import SessionData, OrderData, LoginData, get_atrust_api
+from .libs.finanz_online.finanz_online_library import FinanzOnlineClient, FinanzOnlineCredentials
 from .utils.order_utils import chain_hash, hash_signature, format_order_date, base64url_to_base64
 from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
@@ -48,6 +49,16 @@ class CustomPOSConfig(models.Model):
     def get_atrust_provider(self):
         return get_atrust_api(self.a_trust_environment == 'test')
 
+    def _get_finanz_online_credentials(self):
+        get_param = self.env['ir.config_parameter'].get_param
+        return FinanzOnlineCredentials(
+            tid=get_param('pos_registrierkasse.fon_tid'),
+            benid=get_param('pos_registrierkasse.fon_benid'),
+            pin=get_param('pos_registrierkasse.fon_pin'),
+            herstellerid=get_param('pos_registrierkasse.fon_herstellerid'),
+            env=get_param('pos_registrierkasse.fon_environment', 'test')
+        )
+
     def copy(self, default=None):
         raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
 
@@ -56,7 +67,7 @@ class CustomPOSConfig(models.Model):
         pos_configs = super().create(vals_list)
         for pos_config in pos_configs:
             if pos_config.pos_use_registrierkasse:
-                self._create_starting_receipt(pos_config)
+                self._init_pos(pos_config)
                 pos_config._setup_cron_job()
         return pos_configs
 
@@ -82,7 +93,7 @@ class CustomPOSConfig(models.Model):
             })
         return product_tmpl
 
-    def _create_starting_receipt(self, pos_config_rec):
+    def _init_pos(self, pos_config_rec):
         _logger.info(
             f"RKSV: Creating starting receipt for POS Config '{pos_config_rec.name}' (ID: {pos_config_rec.id})")
         if not pos_config_rec.receipt_sequence_id:
@@ -129,8 +140,55 @@ class CustomPOSConfig(models.Model):
             # Error already logged in helper, re-raise UserError for visibility
             raise UserError(f"Failed to sign RKSV starting receipt for POS '{pos_config_rec.name}'. Error: {e}")
 
-        # Step 4: Close Session
+        # Step 4: FinanzOnline Registration and Verification
+        self._register_pos_and_verify_starting_receipt(order, pos_config_rec)
+
+        # Step 5: Close Session
         pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
+
+    def _register_pos_and_verify_starting_receipt(self, order, pos_config_rec):
+        if not self.env['ir.config_parameter'].get_param('pos_registrierkasse.fon_active'):
+            _logger.info(f"RKSV: FinanzOnline integration is disabled for POS '{pos_config_rec.name}'. Skipping registration and verification.")
+            return
+
+        _logger.info(f"RKSV: Starting FinanzOnline registration and verification for POS '{pos_config_rec.name}'.")
+        credentials = self._get_finanz_online_credentials()
+        try:
+            with FinanzOnlineClient(credentials) as client:
+                _logger.info(f"RKSV: Registering signatureinheit with FinanzOnline.")
+                client.register_se(
+                    customer_info=pos_config_rec.company_id.name,
+                    se_type="HSM_DIENSTLEISTER",
+                    vda_id='AT9' if credentials.env == 'test' else 'AT1',
+                    serial_number=pos_config_rec.certificate_serial_number,
+                    transmission_type='T' if credentials.env == 'test' else 'P'
+                )
+                _logger.info(f"RKSV: Signatureinheit registered successfully.")
+
+                _logger.info(f"RKSV: Registering '{pos_config_rec.name}' with FinanzOnline.")
+                client.register_registrierkasse(
+                    kassen_id=pos_config_rec.name,
+                    customer_info=pos_config_rec.company_id.name,
+                    user_key=pos_config_rec.registrierkasse_aes_key,
+                    note="Initial registration",
+                    transmission_type='T' if credentials.env == 'test' else 'P'
+                )
+                _logger.info(f"RKSV: '{pos_config_rec.name}' registered successfully.")
+
+                _logger.info(f"RKSV: Verifying starting receipt for '{pos_config_rec.name}' with FinanzOnline.")
+                client.verify_receipt(
+                    customer_info=pos_config_rec.company_id.name,
+                    receipt_data=order.machine_readable_code,
+                    transmission_type='T' if credentials.env == 'test' else 'P'
+                )
+                _logger.info(f"RKSV: Starting receipt for '{pos_config_rec.name}' verified successfully.")
+
+        except (UserError, ConnectionError) as e:
+            _logger.error(f"RKSV: FinanzOnline setup failed for '{pos_config_rec.name}': {e}", exc_info=True)
+            raise
+        except Exception as e:
+            _logger.error(f"RKSV: Unexpected error during FinanzOnline setup for '{pos_config_rec.name}': {e}", exc_info=True)
+            raise UserError(f"Unexpected error during FinanzOnline setup: {e}")
 
     def _setup_cron_job(self):
         for config in self:
@@ -152,8 +210,25 @@ class CustomPOSConfig(models.Model):
             today = fields.Date.today()
             next_call_date = today + relativedelta(day=1, months=1)
             last_day_of_month = next_call_date - timedelta(days=1)
+
+            if self.env.user.tz:
+                try:
+                    local_datetime = pytz.timezone(self.env.user.tz).localize(
+                        fields.Datetime.to_datetime(f'{last_day_of_month} {hour:02d}:{minute:02d}:00'))
+                except Exception:
+                    _logger.warning(f"RKSV: Could not localize datetime for user timezone {self.env.user.tz}. Using UTC.")
+                    local_datetime = pytz.utc.localize(
+                        fields.Datetime.to_datetime(f'{last_day_of_month} {hour:02d}:{minute:02d}:00'))
+            else:
+                _logger.warning("RKSV: User timezone not set. Using UTC for cron job scheduling.")
+                local_datetime = pytz.utc.localize(
+                    fields.Datetime.to_datetime(f'{last_day_of_month} {hour:02d}:{minute:02d}:00'))
+
+            # Convert to UTC
+            utc_datetime = local_datetime.astimezone(pytz.utc)
+
             cron.sudo().write({
-                'nextcall': last_day_of_month.strftime(f'%Y-%m-%d {hour:02d}:{minute:02d}:00'),
+                'nextcall': utc_datetime.strftime('%Y-%m-%d %H:%M:%S'),
             })
 
     def _cron_create_monthly_receipt(self):
@@ -192,6 +267,25 @@ class CustomPOSConfig(models.Model):
             _logger.info(
                 f"RKSV CRON: Monthly receipt (Order ID: {order.id}) for POS '{self.name}' signed.")
 
+            # Step 3: If it's the end of the year, send the Jahresbeleg to FinanzOnline
+            today = fields.Date.today()
+            if today.month == 12 and self.env['ir.config_parameter'].get_param('pos_registrierkasse.fon_active'):
+                _logger.info(f"RKSV CRON: Jahresbeleg for '{self.name}'. Sending to FinanzOnline.")
+                credentials = self._get_finanz_online_credentials()
+                try:
+                    with FinanzOnlineClient(credentials) as client:
+                        _logger.info(f"RKSV CRON: Verifying Jahresbeleg for '{self.name}' with FinanzOnline.")
+                        if client.verify_receipt(
+                            customer_info=self.company_id.name,
+                            receipt_data=order.machine_readable_code,
+                            transmission_type='T' if credentials.env == 'test' else 'P'
+                        ):
+                            _logger.info(f"RKSV CRON: Jahresbeleg for '{self.name}' sent successfully to FinanzOnline.")
+                        else:
+                            _logger.error(f"RKSV CRON: Failed to send Jahresbeleg for '{self.name}' to FinanzOnline.")
+                except Exception as e:
+                    _logger.error(f"RKSV CRON: Error sending Jahresbeleg for '{self.name}' to FinanzOnline: {e}", exc_info=True)
+
         except Exception as e:
             _logger.error(f"RKSV CRON: Error processing POS Config '{self.name}': {e}", exc_info=True)
         finally:
@@ -207,7 +301,7 @@ class CustomPOSConfig(models.Model):
         if "pos_use_registrierkasse" in vals and vals["pos_use_registrierkasse"]:
             for record in self:  # self can be multiple records in write
                 if not record.pos_rksv_lock:  # Check if already locked/initialized
-                    self._create_starting_receipt(record)
+                    self._init_pos(record)
                     record._setup_cron_job()
         return res
 

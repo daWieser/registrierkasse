@@ -11,7 +11,7 @@
                         <span>RKSV</span>
                     </h5>
                     <div role="menuitem">
-                        <button name="action_download_daten_erfassungs_protokoll" type="object" string="Datenerfassungsprotokoll"/>
+                        <button name="action_download_daten_erfassungs_protokoll" type="object" string="Data Recording Protocol"/>
                     </div>
                 </div>
             </field>

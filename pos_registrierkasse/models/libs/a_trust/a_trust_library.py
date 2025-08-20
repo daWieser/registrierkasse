@@ -144,7 +144,7 @@ class ATrustMockProvider(ATrustProvider):
 
     def get_certificate_information(self, username):
         return CertificateInformation(
-            certificate_serial_number='mock_serial_number',
+            certificate_serial_number='1234567890ABC',
             signature_certificate='mock_signature_certificate',
             certification_body=['mock_certification_body']
         )
