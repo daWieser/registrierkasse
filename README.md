@@ -16,6 +16,7 @@ Open source Odoo addon, to enable RKSV compliance in Odoo POS.
 *   **Automated Startbeleg Creation:** Automatically generates the initial "Startbeleg" (starting receipt) when a POS is configured for RKSV.
 *   **Configurable A-Trust API Environment:** Allows selection between Test and Production environments for A-Trust API communication directly from POS settings.
 *   **Automated Nullbeleg Generation:** Automatically creates monthly Nullbeleg receipts as required by law.
+*   **FinanzOnline Connection:** If a FinanzOnline webservice user is configured, new cash-registers are automatically registered with FinanzOnline. Additionally yearly Nullbelege are sent to FinanzOnline at the end of the year.
 *   **Stornobeleg Creation:** Supports the creation of Stornobelege (cancellation receipts) for RKSV compliance.
 *   **Datenerfassungsprotokoll Export:** Enables the export of the "Datenerfassungsprotokoll" (data capture protocol) for quarterly backups.
 

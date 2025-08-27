@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="pos_registrierkasse.CustomerDisplay" t-inherit="point_of_sale.CustomerDisplay" t-inherit-mode="extension">
+
+        <xpath expr="//div[contains(@class, 'o_customer_display_sidebar')]//div[contains(@class, 'position-absolute')]/OdooLogo" position="after">
+            <span class="mx-2">and</span>
+            <img src="/pos_registrierkasse/static/src/img/logo.png" style="width: 5rem;" alt="Logo"/>
+        </xpath>
+
+        <xpath expr="//div[contains(@class, 'justify-content-center')]/div[contains(@class, 'bottom-0') and not(contains(@class, 'text-bg-dark'))]/OdooLogo" position="after">
+            <span class="mx-2">and</span>
+            <img src="/pos_registrierkasse/static/src/img/logo.png" style="width: 5rem;" alt="Logo"/>
+        </xpath>
+
+    </t>
+</templates>

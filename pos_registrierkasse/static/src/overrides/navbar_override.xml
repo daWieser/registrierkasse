@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_registrierkasse.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//img[hasclass('pos-logo')]" position="attributes">
+            <attribute name="src">/pos_registrierkasse/static/src/img/logo.png</attribute>
+        </xpath>
+    </t>
+</templates>

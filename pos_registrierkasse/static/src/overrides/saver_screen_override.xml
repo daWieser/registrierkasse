@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_registrierkasse.SaverScreen" t-inherit="point_of_sale.SaverScreen" t-inherit-mode="extension">
+        <xpath expr="//img[@src='/web/static/img/odoo_logo.svg']" position="attributes">
+            <attribute name="src">/pos_registrierkasse/static/src/img/logo.png</attribute>
+        </xpath>
+    </t>
+</templates>
