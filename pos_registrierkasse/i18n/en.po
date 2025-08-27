@@ -1,0 +1,22 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * pos_registrierkasse
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0alpha1"
+"Report-Msgid-Bugs-To: "
+"POT-Creation-Date: 2025-08-07 17:00+0000"
+"PO-Revision-Date: 2025-08-07 17:00+0000"
+"Last-Translator: "
+"Language-Team: "
+"MIME-Version: 1.0"
+"Content-Type: text/plain; charset=UTF-8"
+"Content-Transfer-Encoding: 8bit"
+"X-Generator: Odoo"
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "Powered by Odoo"
+msgstr "Powered by Odoo and Vorstieg Software"

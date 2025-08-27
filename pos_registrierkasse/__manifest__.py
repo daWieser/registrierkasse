@@ -26,6 +26,9 @@
         'point_of_sale._assets_pos': [
             '/pos_registrierkasse/static/src/**/*',
         ],
+        'point_of_sale.customer_display_assets': [
+            '/pos_registrierkasse/static/src/overrides/customer_display_override.xml',
+        ],
     },
     'data': [
         'views/pos_config.xml',
