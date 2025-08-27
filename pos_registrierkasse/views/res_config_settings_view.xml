@@ -6,8 +6,9 @@
             <field name="model">res.config.settings</field>
             <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//block[@id='pos_accounting_section']" position="after">
-                    <block title="FinanzOnline (Austria)" id="pos_registrierkasse_section">
+                <xpath expr="//app[@name='point_of_sale']/setting[@type='header']" position="before">
+                    <setting type="header" string="Global Settings"/>
+                    <block id="pos_registrierkasse_section">
                         <setting string="Activate FinanzOnline-Integration">
                             <field name="fon_active"/>
                             <div class="content-group" invisible="fon_active == False">
