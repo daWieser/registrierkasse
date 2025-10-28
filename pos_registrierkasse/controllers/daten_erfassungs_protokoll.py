@@ -37,12 +37,12 @@ class DatenErfassungsProtokollController(http.Controller):
     def _file_content(self, request, config):
         orders = request.env['pos.order'].search([
             ('session_id.config_id', '=', config.id)
-        ])
+        ], order = 'registrierkasse_receipt_number asc')
 
         orders_short = [self._create_short_representation(order, config) for order in orders]
 
         return {
-            "Belege - Gruppe": [
+            "Belege-Gruppe": [
                 {
                     'Signaturzertifikat': config.signature_certificate,
                     'Zertifizierungsstellen': json.loads(

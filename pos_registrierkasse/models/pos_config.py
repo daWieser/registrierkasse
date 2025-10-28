@@ -109,7 +109,7 @@ class CustomPOSConfig(models.Model):
 
         # Step 2: Create Session & Order
         pos_session = self._rksv_create_pos_session(pos_config_rec, "Starting Receipt Session")
-        receipt_num = pos_config_rec.receipt_sequence_id.next_by_id()
+        receipt_num = int(pos_config_rec.receipt_sequence_id.next_by_id())
         order_date_obj = fields.Datetime.now()
         initial_prev_order_sig_hash = hash_signature(pos_config_rec.name)  # Special for first receipt
 
@@ -166,7 +166,7 @@ class CustomPOSConfig(models.Model):
         try:
             # Step 1: Create Session & Order
             pos_session = self._rksv_create_pos_session(self, "Monthly Null Receipt Session")
-            receipt_num = self.receipt_sequence_id.next_by_id()
+            receipt_num = int(self.receipt_sequence_id.next_by_id())
             order_date_obj = fields.Datetime.now()
 
             prev_rksv_order = self.env['pos.order'].search([

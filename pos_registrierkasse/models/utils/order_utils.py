@@ -10,7 +10,7 @@ from .a_trust_library import OrderData
 def chain_hash(config, order):
     data_to_sign = OrderData(config.name,
                              order.registrierkasse_receipt_number,
-                             order.date_order,
+                             format_order_date_datetime(order.date_order),
                              order.sum_vat_normal,
                              order.sum_vat_discounted_1,
                              order.sum_vat_discounted_2,
@@ -46,6 +46,10 @@ def format_order_date(date):
     utc_time = utc_time.replace(tzinfo=pytz.UTC)
 
     local_time = utc_time.astimezone(pytz.timezone("Europe/Vienna"))
+    return datetime.strftime(local_time, "%Y-%m-%dT%H:%M:%S")
+
+def format_order_date_datetime(time):
+    local_time = time.astimezone(pytz.timezone("Europe/Vienna"))
     return datetime.strftime(local_time, "%Y-%m-%dT%H:%M:%S")
 
 

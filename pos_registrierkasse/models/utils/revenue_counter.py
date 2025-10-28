@@ -14,7 +14,7 @@ def encrypt_revenue_counter(revenue_counter, aes_key, pos_name, sequence_number)
     # However for the qr code it needs to be 5 bytes. So the first 5 bytes of the revenue counter are filled
     data = int(revenue_counter * 100).to_bytes(5, byteorder='big', signed=True) + b'\x00' * 11
 
-    encrypted = encryptor.update(data) + encryptor.finalize()[:5]
+    encrypted = (encryptor.update(data) + encryptor.finalize())[:5]
     return b64encode(encrypted).decode('utf-8')
 
 

@@ -32,7 +32,7 @@ class CustomPOSOrder(models.Model):
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
         config.revenue_counter += order_vals.get('amount_total', 0.0)
-        receipt_number = config.receipt_sequence_id.next_by_id()
+        receipt_number = int(config.receipt_sequence_id.next_by_id())
 
         prev_order = self.env['pos.order'].search(
             [('registrierkasse_receipt_number', '=', int(receipt_number) - 1),
