@@ -1,12 +1,11 @@
-import os
 import logging
+import os
 from dataclasses import dataclass
-
-from zeep import Client, Settings, __version__
-from zeep.transports import Transport
-from zeep.xsd import SkipValue
-from zeep.exceptions import Fault
 from datetime import datetime, timezone
+
+from zeep import Client, Settings
+from zeep.exceptions import Fault
+from zeep.transports import Transport
 
 _logger = logging.getLogger(__name__)
 
@@ -71,7 +70,10 @@ class FinanzOnlineClient:
                 'kundeninfo': customer_info,
                 'art_se': se_type,
                 'vda_id': vda_id,
-                'zertifikatsseriennummer': serial_number
+                'zertifikatsseriennummer': {
+                    '_value_1': serial_number,
+                    'hex': True
+                }
             }]
         }
 
