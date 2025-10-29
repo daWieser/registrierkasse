@@ -70,10 +70,7 @@ class FinanzOnlineClient:
                 'kundeninfo': customer_info,
                 'art_se': se_type,
                 'vda_id': vda_id,
-                'zertifikatsseriennummer': {
-                    '_value_1': serial_number,
-                    'hex': True
-                }
+                'zertifikatsseriennummer': serial_number
             }]
         }
 

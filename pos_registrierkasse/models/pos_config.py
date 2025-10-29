@@ -110,6 +110,7 @@ class CustomPOSConfig(models.Model):
             pos_config_rec.a_trust_session_key = a_trust_api_session.sessionKey
             pos_config_rec.pos_rksv_lock = True
             pos_config_rec.certificate_serial_number = signature_cert_info.certificate_serial_number
+            certificate_serial_number_binary = signature_cert_info.certificate_serial_number_binary
             pos_config_rec.signature_certificate = signature_cert_info.signature_certificate
             pos_config_rec.certificate_certification_body = json.dumps(signature_cert_info.certification_body)
             _logger.info(f"RKSV: POS Config '{pos_config_rec.name}' updated with A-Trust details.")
@@ -141,12 +142,12 @@ class CustomPOSConfig(models.Model):
             raise UserError(f"Failed to sign RKSV starting receipt for POS '{pos_config_rec.name}'. Error: {e}")
 
         # Step 4: FinanzOnline Registration and Verification
-        self._register_pos_and_verify_starting_receipt(order, pos_config_rec)
+        self._register_pos_and_verify_starting_receipt(order, pos_config_rec, certificate_serial_number_binary)
 
         # Step 5: Close Session
         pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
 
-    def _register_pos_and_verify_starting_receipt(self, order, pos_config_rec):
+    def _register_pos_and_verify_starting_receipt(self, order, pos_config_rec, certificate_serial_number_binary):
         if not self.env['ir.config_parameter'].get_param('pos_registrierkasse.fon_active'):
             _logger.info(f"RKSV: FinanzOnline integration is disabled for POS '{pos_config_rec.name}'. Skipping registration and verification.")
             return
@@ -155,12 +156,12 @@ class CustomPOSConfig(models.Model):
         credentials = self._get_finanz_online_credentials()
         try:
             with FinanzOnlineClient(credentials) as client:
-                _logger.info(f"RKSV: Registering signatureinheit with FinanzOnline.")
+                _logger.info(f"RKSV: Registering signatureinheit with certificate number '{certificate_serial_number_binary}' with FinanzOnline.")
                 client.register_se(
                     customer_info=pos_config_rec.company_id.name,
                     se_type="HSM_DIENSTLEISTER",
                     vda_id='AT9' if credentials.env == 'test' else 'AT1',
-                    serial_number=pos_config_rec.certificate_serial_number,
+                    serial_number=certificate_serial_number_binary,
                     transmission_type='T' if credentials.env == 'test' else 'P'
                 )
                 _logger.info(f"RKSV: Signatureinheit registered successfully.")

@@ -54,6 +54,7 @@ class OrderData:
 @dataclass()
 class CertificateInformation:
     certificate_serial_number: str
+    certificate_serial_number_binary: str
     signature_certificate: str
     certification_body: [str]
 
@@ -128,7 +129,9 @@ class ATrustProdProvider(ATrustProvider):
         if response.status_code != 200:
             raise Exception("got the following error from signature: " + str(response.status_code))
         certificate = response.json()['Signaturzertifikate'][0]
-        return CertificateInformation(certificate['ZertifikatsseriennummerHex'], certificate['Signaturzertifikat'],
+        return CertificateInformation(certificate['ZertifikatsseriennummerHex'],
+                                      certificate['Zertifikatsseriennummer'],
+                                      certificate['Signaturzertifikat'],
                                       certificate['Zertifizierungsstellen'])
 
 
