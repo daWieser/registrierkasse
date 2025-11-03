@@ -77,10 +77,13 @@ class ATrustProvider(ABC):
 
 
 class ATrustProdProvider(ATrustProvider):
-    BASE_PATH = "https://rksv.a-trust.at/asignrkonline/v2"
+    base_path = "https://rksv.a-trust.at/asignrkonline/v2"
+
+    def __init__(self, base_path):
+        self.base_path = base_path
 
     def login(self, user):
-        url = self.BASE_PATH + '/Session/' + user.username
+        url = self.base_path + '/Session/' + user.username
         request_payload = {'password': user.password}
 
         response = put(url, json=request_payload)
@@ -90,7 +93,7 @@ class ATrustProdProvider(ATrustProvider):
         return SessionData(response_payload['sessionkey'], response_payload['sessionid'])
 
     def logout(self, session):
-        url = self.BASE_PATH + '/Session/' + session.sessionId
+        url = self.base_path + '/Session/' + session.sessionId
 
         response = delete(url)
         if response.status_code != 200:
@@ -103,7 +106,7 @@ class ATrustProdProvider(ATrustProvider):
         to_be_signed = "eyJhbGciOiJFUzI1NiJ9" + '.' + jws_payload
         to_be_signed = base64.b64encode(bytes(to_be_signed, 'utf-8')).decode('ascii')
 
-        url = self.BASE_PATH + '/Session/' + session.sessionId + '/Sign'
+        url = self.base_path + '/Session/' + session.sessionId + '/Sign'
         payload = {
             "sessionkey": session.sessionKey,
             "to_be_signed": to_be_signed,
@@ -119,7 +122,7 @@ class ATrustProdProvider(ATrustProvider):
         return response.json()['signature']
 
     def get_certificate_information(self, username):
-        url = self.BASE_PATH + '/' + username + '/Certificates'
+        url = self.base_path + '/' + username + '/Certificates'
         response = get(url)
 
         if response.status_code == 401:
@@ -150,11 +153,12 @@ class ATrustMockProvider(ATrustProvider):
         )
 
 
-def get_atrust_api(is_test_env):
-    if is_test_env:
+def get_atrust_api(env):
+    if env == 'test':
         return ATrustMockProvider()
-    else:
-        return ATrustProdProvider()
+    elif env == 'qa':
+        return ATrustProdProvider("https://hs-abnahme.a-trust.at/asignrkonline/v2")
+    return ATrustProdProvider("https://rksv.a-trust.at/asignrkonline/v2")
 
 
 class PosUtilsTest(unittest.TestCase):

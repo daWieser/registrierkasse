@@ -90,7 +90,7 @@ class PosUtilsTest(unittest.TestCase):
 
         order = MagicMock()
         order.registrierkasse_receipt_number = "366587"
-        order.date_order = "2015-12-17T11:23:44"
+        order.date_order = datetime.strptime("2015-12-17T11:23:44","%Y-%m-%dT%H:%M:%S")
         order.sum_vat_normal = 34.77
         order.sum_vat_discounted_1 = 59.64
         order.sum_vat_discounted_2 = 38.13
