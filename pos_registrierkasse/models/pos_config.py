@@ -41,13 +41,13 @@ class CustomPOSConfig(models.Model):
     monthly_nullbeleg_time = fields.Float(string='Time for Nullbeleg', default=21.0)
 
     a_trust_environment = fields.Selection(
-        [('test', 'Test Environment'), ('production', 'Production Environment')],
+        [('test', 'Test Environment'), ('production', 'Production Environment'),('qa','A-Trust Abnahme Environment')],
         string='A-Trust Environment',
         default='production'
     )
 
     def get_atrust_provider(self):
-        return get_atrust_api(self.a_trust_environment == 'test')
+        return get_atrust_api(self.a_trust_environment)
 
     def _get_finanz_online_credentials(self):
         get_param = self.env['ir.config_parameter'].get_param

@@ -37,7 +37,7 @@ class DatenErfassungsProtokollController(http.Controller):
     def _file_content(self, request, config):
         orders = request.env['pos.order'].search([
             ('session_id.config_id', '=', config.id)
-        ], order = 'registrierkasse_receipt_number asc')
+        ], order='registrierkasse_receipt_number asc')
 
         orders_short = [self._create_short_representation(order, config) for order in orders]
 
@@ -50,8 +50,8 @@ class DatenErfassungsProtokollController(http.Controller):
                     'Belege-kompakt': orders_short
                 }
             ]
-
         }
+
     def _create_short_representation(self, order, config):
         utc_time = order['date_order'].replace(tzinfo=pytz.UTC)
 
@@ -70,3 +70,35 @@ class DatenErfassungsProtokollController(http.Controller):
                                config.certificate_serial_number,
                                order.prev_order_signature)
         return jws_signature_compact(order_data.parse(), order.order_signature)
+
+    @http.route('/download/pos_registrierkasse/cryptographic_container/<int:record_id>', type='http', auth='user')
+    def download_cryptographic_container(self, record_id, **kwargs):
+        config = request.env['pos.config'].browse(record_id)
+        if not config.exists():
+            return request.not_found()
+        if not config.pos_use_registrierkasse:
+            return request.not_found()
+
+        data = self._cryptographic_container(config)
+        json_content = json.dumps(data, indent=4)
+
+        # Send file as response
+        return request.make_response(
+            json_content,
+            headers=[
+                ('Content-Type', 'application/json'),
+                ('Content-Disposition', content_disposition('cryptographicMaterialContainer.json'))
+            ]
+        )
+
+    def _cryptographic_container(self, config):
+        return {
+            "base64AESKey": config.registrierkasse_aes_key,
+            "certificateOrPublicKeyMap": {
+                config.certificate_serial_number: {
+                    "id": config.certificate_serial_number,
+                    "signatureDeviceType": "CERTIFICATE",
+                    "signatureCertificateOrPublicKey": config.signature_certificate
+                }
+            }
+        }
