@@ -46,7 +46,7 @@ class PosUtilsTest(unittest.TestCase):
                                                  "mWSdfdY96cjlFE5+eKCzcXinWuBzhJvmMJ60QRvBJLI=",
                                                  "demokasse42",
                                                  1),
-                         'zCuys3ZTbnT5hI0lGUo0Yg==',
+                         'zCuys3Y=',
                          "Revenue counter 0")
 
     def test_decrypt_revenue_counter_zero(self):

@@ -174,7 +174,7 @@ class CustomPOSConfig(models.Model):
                 ('registrierkasse_receipt_number', '=', int(receipt_num) - 1),
                 ('state', 'in', ['paid', 'done', 'invoiced'])
             ], limit=1, order='registrierkasse_receipt_number desc, id desc')
-            prev_order_jws_hash_for_chaining = chain_hash(self, prev_rksv_order)
+            prev_order_jws_hash_for_chaining = chain_hash(prev_rksv_order)
 
             order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
 
@@ -321,8 +321,6 @@ class CustomPOSConfig(models.Model):
                 exc_info=True)
             raise UserError(
                 f"Failed to sign JWS for Order ID {order_rec.id} on POS '{pos_config_rec.name}'. Error: {e}")
-
-        machine_readable_code += '_' + base64url_to_base64(actual_jws_signature)
 
         order_rec.encrypted_revenue = encrypted_revenue_val
         order_rec.order_signature = actual_jws_signature

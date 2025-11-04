@@ -1,17 +1,12 @@
 /** @odoo-module **/
 
 
-import { patch } from "@web/core/utils/patch";
-import { PosStore } from "@point_of_sale/app/store/pos_store";
+import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_screen";
+import {patch} from '@web/core/utils/patch';
 
-patch(PosStore.prototype, {
-    async preSyncAllOrders(orders) {
-        if (super.preSyncAllOrders) {
-            await super.preSyncAllOrders(orders);
-        }
 
-        //ToDo make sure only one - or exactly one and that has not yet been synced
-        const order = orders[0]
+patch(PaymentScreen.prototype, {
+    async _finalizeValidation() {
 
         let sum_vat_normal = 0;
         let sum_vat_discounted_1 = 0;
@@ -19,6 +14,7 @@ patch(PosStore.prototype, {
         let sum_vat_null = 0;
         let sum_vat_special = 0;
 
+        const order = this.currentOrder;
         order.lines.forEach(function (line) {
             const lineAmount = line.get_price_with_tax();
             const taxPercentage = line.tax_ids?.[0]?.amount ?? 0;
@@ -46,7 +42,7 @@ patch(PosStore.prototype, {
         order.sum_vat_null = sum_vat_null;
         order.sum_vat_special = sum_vat_special;
 
-        const signature = await this.data.call("pos.order", "sign_order", [order.serialize()]);
+        const signature = await this.pos.data.call("pos.order", "sign_order", [order.serialize()]);
 
         order.certificate_serial_number = signature.certificate_serial_number
         order.prev_order_signature = signature.prev_order_signature
@@ -54,5 +50,7 @@ patch(PosStore.prototype, {
         order.order_signature = signature.order_signature
         order.encrypted_revenue = signature.encrypted_revenue
         order.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
+
+        return super._finalizeValidation();
     }
 })
