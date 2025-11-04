@@ -5,12 +5,12 @@ import {Order} from "@point_of_sale/app/store/models";
 import {patch} from '@web/core/utils/patch';
 import {qrCodeSrc} from "@point_of_sale/utils";
 
-patch(PosOrder.prototype, {
+patch(Order.prototype, {
     export_for_printing(baseUrl, headerData) {
         const results = super.export_for_printing(...arguments);
         const code = this.machine_readable_code + "_" + this._base64UrlToBase64(this.order_signature);
         results.pos_kasse_code = qrCodeSrc(code);
-        results.kassenidentifikationsnummer = this.config_id.name;
+        results.kassenidentifikationsnummer = this.pos.config.name;
         results.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
 
         return results;
@@ -34,6 +34,7 @@ patch(PosOrder.prototype, {
         this.sum_vat_discounted_2 = json.sum_vat_discounted_2;
         this.sum_vat_null = json.sum_vat_null;
         this.sum_vat_special = json.sum_vat_special;
+        this.machine_readable_code = json.machine_readable_code;
     },
 
     export_as_JSON() {
@@ -49,6 +50,7 @@ patch(PosOrder.prototype, {
         json.sum_vat_null = this.sum_vat_null;
         json.sum_vat_special = this.sum_vat_special;
         json.is_refund = this._isRefundOrder();
+        json.machine_readable_code = this.machine_readable_code;
         return json
     }
 });

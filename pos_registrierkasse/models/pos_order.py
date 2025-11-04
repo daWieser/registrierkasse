@@ -2,7 +2,7 @@ from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
 from .utils.a_trust_library import SessionData, OrderData, LoginData
-from .utils.order_utils import chain_hash, format_order_date, base64url_to_base64
+from .utils.order_utils import chain_hash, format_order_date
 from .utils.revenue_counter import encrypt_revenue_counter
 
 
@@ -94,7 +94,7 @@ class CustomPOSOrder(models.Model):
 
     @api.model
     def sign_order(self, order_data_dict):
-        session_id = order_data_dict.get('session_id')
+        session_id = order_data_dict.get('pos_session_id')
         if not isinstance(session_id, int):
             return {'error': 'Invalid session_id in order_data_dict'}
 

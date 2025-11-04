@@ -23,13 +23,6 @@ def hash_signature(signature):
     return b64encode(relevant_bytes).decode("utf-8")
 
 
-def base64url_to_base64(base64url_str: str) -> str:
-    """Converts a Base64URL encoded string to a Base64 encoded string."""
-    base64_str = base64url_str.replace('-', '+').replace('_', '/')
-    padding = '=' * (-len(base64_str) % 4)
-    return base64_str + padding
-
-
 def format_order_date(date):
     utc_time = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     utc_time = utc_time.replace(tzinfo=pytz.UTC)
@@ -47,15 +40,6 @@ class PosUtilsTest(unittest.TestCase):
             self.BELEG_CODE, self.BELEG_SIGNATURE),
             "eyJhbGciOiJFUzI1NiJ9.X1IxLUFUMF9ERU1PLUNBU0gtQk9YNTI0XzM2NjU4N18yMDE1LTEyLTE3VDExOjIzOjQ0XzM0LDc3XzU5LDY0XzM4LDEzXzAsMDBfMCwwMF84TUc4QzFLcjdIQT1fMjBmMmVkMTcyZGFhMDllNV94VGZadmtCU1RyND0.GeWps9kci-fUqKLymS1pHlIbv0L8Oek-v6TDmZj9Ffucb8yvSijqZ8LcBalV9lADMXQ8U3itViKkd_i1Ba22BA",
             "Compact JWS signature")
-
-    def test_with_hyphen_and_underscore(self):
-        base64url_hyphen = "3q2-7w"
-        expected_base64_hyphen = "3q2+7w=="
-        self.assertEqual(base64url_to_base64(base64url_hyphen), expected_base64_hyphen)
-
-        base64url_underscore = "AQID_w"
-        expected_base64_underscore = "AQID/w=="
-        self.assertEqual(base64url_to_base64(base64url_underscore), expected_base64_underscore)
 
     def test_hash_signature_startbeleg(self):
         self.assertEqual(hash_signature("A12347"), "OeSKQjO4zKI=", "Hash Startbeleg")

@@ -1,13 +1,13 @@
 import json
 import logging
-from base64 import urlsafe_b64encode
+from datetime import timedelta
+
+from dateutil.relativedelta import relativedelta
 from odoo import api, models, fields
 from odoo.exceptions import UserError
-from dateutil.relativedelta import relativedelta
-from datetime import timedelta, date
 
 from .utils.a_trust_library import SessionData, OrderData, LoginData, get_atrust_api
-from .utils.order_utils import chain_hash, hash_signature, format_order_date, base64url_to_base64
+from .utils.order_utils import chain_hash, hash_signature, format_order_date
 from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
 
 _logger = logging.getLogger(__name__)
