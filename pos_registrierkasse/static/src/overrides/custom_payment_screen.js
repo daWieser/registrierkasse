@@ -15,6 +15,7 @@ patch(PaymentScreen.prototype, {
         let sum_vat_special = 0;
 
         const order = this.currentOrder;
+        order.recomputeOrderData()
         order.lines.forEach(function (line) {
             const lineAmount = line.get_price_with_tax();
             const taxPercentage = line.tax_ids?.[0]?.amount ?? 0;
