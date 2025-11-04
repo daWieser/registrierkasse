@@ -5,22 +5,8 @@ from unittest.mock import MagicMock
 from datetime import datetime
 import pytz
 
-from odoo.addons.pos_registrierkasse.models.libs.a_trust.a_trust_library import OrderData
-
-
-def chain_hash(config, order):
-    data_to_sign = OrderData(config.name,
-                             order.registrierkasse_receipt_number,
-                             order.date_order,
-                             order.sum_vat_normal,
-                             order.sum_vat_discounted_1,
-                             order.sum_vat_discounted_2,
-                             order.sum_vat_null,
-                             order.sum_vat_special,
-                             order.encrypted_revenue,
-                             config.certificate_serial_number,
-                             order.prev_order_signature)
-    return hash_signature(jws_signature_compact(data_to_sign.parse(), order.order_signature))
+def chain_hash(order):
+    return hash_signature(jws_signature_compact(order.machine_readable_code, order.order_signature))
 
 
 def jws_signature_compact(payload, signature):
@@ -36,11 +22,13 @@ def hash_signature(signature):
     relevant_bytes = hash_value[:8]
     return b64encode(relevant_bytes).decode("utf-8")
 
+
 def base64url_to_base64(base64url_str: str) -> str:
     """Converts a Base64URL encoded string to a Base64 encoded string."""
     base64_str = base64url_str.replace('-', '+').replace('_', '/')
     padding = '=' * (-len(base64_str) % 4)
     return base64_str + padding
+
 
 def format_order_date(date):
     utc_time = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
@@ -79,28 +67,20 @@ class PosUtilsTest(unittest.TestCase):
             "Hash normaler Beleg")
 
     def test_chain_hash(self):
-        OrderData.ALGO_KENNUNG = '_R1-AT0_'  # AT1 ist die Kennung von A-Trust
         config = MagicMock()
 
         config.name = "DEMO-CASH-BOX524"
         config.certificate_serial_number = "20f2ed172daa09e5"
 
         order = MagicMock()
-        order.registrierkasse_receipt_number = "366587"
-        order.date_order = "2015-12-17T11:23:44"
-        order.sum_vat_normal = 34.77
-        order.sum_vat_discounted_1 = 59.64
-        order.sum_vat_discounted_2 = 38.13
-        order.sum_vat_null = 0
-        order.sum_vat_special = 0
-        order.encrypted_revenue = "8MG8C1Kr7HA="
-        order.prev_order_signature = "xTfZvkBSTr4="
+        order.machine_readable_code= self.BELEG_CODE
         order.order_signature = self.BELEG_SIGNATURE
 
-        self.assertEqual(chain_hash(config, order), "5HjRCx+XIz4=", "Chain Hash is calculated correctly")
+        self.assertEqual(chain_hash(order), "5HjRCx+XIz4=", "Chain Hash is calculated correctly")
 
     def test_format_order_date(self):
-        self.assertEqual(format_order_date("2025-04-23 15:34:22"),"2025-04-23T17:34:22")
+        self.assertEqual(format_order_date("2025-04-23 15:34:22"), "2025-04-23T17:34:22")
+
 
 if __name__ == "__main__":
     unittest.main()

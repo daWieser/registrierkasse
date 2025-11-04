@@ -41,13 +41,13 @@ class CustomPOSConfig(models.Model):
     monthly_nullbeleg_time = fields.Float(string='Time for Nullbeleg', default=21.0)
 
     a_trust_environment = fields.Selection(
-        [('test', 'Test Environment'), ('production', 'Production Environment')],
+        [('test', 'Test Environment'), ('production', 'Production Environment'),('qa','A-Trust Abnahme Environment')],
         string='A-Trust Environment',
         default='production'
     )
 
     def get_atrust_provider(self):
-        return get_atrust_api(self.a_trust_environment == 'test')
+        return get_atrust_api(self.a_trust_environment)
 
     def _get_finanz_online_credentials(self):
         get_param = self.env['ir.config_parameter'].get_param
@@ -121,7 +121,7 @@ class CustomPOSConfig(models.Model):
 
         # Step 2: Create Session & Order
         pos_session = self._rksv_create_pos_session(pos_config_rec, "Starting Receipt Session")
-        receipt_num = pos_config_rec.receipt_sequence_id.next_by_id()
+        receipt_num = int(pos_config_rec.receipt_sequence_id.next_by_id())
         order_date_obj = fields.Datetime.now()
         initial_prev_order_sig_hash = hash_signature(pos_config_rec.name)  # Special for first receipt
 
@@ -242,7 +242,7 @@ class CustomPOSConfig(models.Model):
         try:
             # Step 1: Create Session & Order
             pos_session = self._rksv_create_pos_session(self, "Monthly Null Receipt Session")
-            receipt_num = self.receipt_sequence_id.next_by_id()
+            receipt_num = int(self.receipt_sequence_id.next_by_id())
             order_date_obj = fields.Datetime.now()
 
             prev_rksv_order = self.env['pos.order'].search([
@@ -250,7 +250,7 @@ class CustomPOSConfig(models.Model):
                 ('registrierkasse_receipt_number', '=', int(receipt_num) - 1),
                 ('state', 'in', ['paid', 'done', 'invoiced'])
             ], limit=1, order='registrierkasse_receipt_number desc, id desc')
-            prev_order_jws_hash_for_chaining = chain_hash(self, prev_rksv_order)
+            prev_order_jws_hash_for_chaining = chain_hash(prev_rksv_order)
 
             order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
 
@@ -416,8 +416,6 @@ class CustomPOSConfig(models.Model):
                 exc_info=True)
             raise UserError(
                 f"Failed to sign JWS for Order ID {order_rec.id} on POS '{pos_config_rec.name}'. Error: {e}")
-
-        machine_readable_code += '_' + base64url_to_base64(actual_jws_signature)
 
         order_rec.encrypted_revenue = encrypted_revenue_val
         order_rec.order_signature = actual_jws_signature

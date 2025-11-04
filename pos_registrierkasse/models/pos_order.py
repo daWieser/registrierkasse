@@ -32,7 +32,7 @@ class CustomPOSOrder(models.Model):
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
         config.revenue_counter += order_vals.get('amount_total', 0.0)
-        receipt_number = config.receipt_sequence_id.next_by_id()
+        receipt_number = int(config.receipt_sequence_id.next_by_id())
 
         prev_order = self.env['pos.order'].search(
             [('registrierkasse_receipt_number', '=', int(receipt_number) - 1),
@@ -52,7 +52,7 @@ class CustomPOSOrder(models.Model):
         if not isinstance(date_order_str, str):
             date_order_str = fields.Datetime.to_string(fields.Datetime.now())
 
-        prev_order_signature = chain_hash(config, prev_order)
+        prev_order_signature = chain_hash(prev_order)
 
         machine_readable_code = OrderData(
             config.name,
@@ -81,8 +81,6 @@ class CustomPOSOrder(models.Model):
             })
             a_trust_session_data_obj_retry = SessionData(a_trust_login_session.sessionKey, a_trust_login_session.sessionId)
             order_signature = atrust_api.create_signature(a_trust_session_data_obj_retry, machine_readable_code)
-
-        machine_readable_code += '_' + base64url_to_base64(order_signature)
 
         return {
             'encrypted_revenue': encrypted_revenue,
