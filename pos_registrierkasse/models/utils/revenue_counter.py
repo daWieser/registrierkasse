@@ -83,7 +83,7 @@ class PosUtilsTest(unittest.TestCase):
         int_value = int.from_bytes(decrypted, byteorder='big', signed=True)
         self.assertEqual(int_value, 2200)
 
-    def test_decrypt_revenue_counter_after_addition(self):
+    def test_decrypt_revenue_counter_after_addition_with_one_decimal_place(self):
         encrypted = b64decode(encrypt_revenue_counter(1.2 + 2.4,
                                                       self.AES_KEY,
                                                       "DEMO-CASH-BOX",
@@ -93,7 +93,7 @@ class PosUtilsTest(unittest.TestCase):
         int_value = int.from_bytes(decrypted, byteorder='big', signed=True)
         self.assertEqual(int_value, 360)
 
-    def test_decrypt_revenue_counter_after_addition_2(self):
+    def test_decrypt_revenue_counter_after_addition_with_two_decimal_places(self):
         encrypted = b64decode(encrypt_revenue_counter(3.33 + 3.11,
                                                       self.AES_KEY,
                                                       "DEMO-CASH-BOX",
