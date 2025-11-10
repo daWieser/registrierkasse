@@ -13,6 +13,7 @@ patch(PaymentScreen.prototype, {
         let sum_vat_discounted_2 = 0;
         let sum_vat_null = 0;
         let sum_vat_special = 0;
+        let isRefund = true;
 
         const order = this.currentOrder;
         order.recomputeOrderData()
@@ -36,6 +37,8 @@ patch(PaymentScreen.prototype, {
                 default:
                     sum_vat_special += lineAmount;
             }
+            if (!line.refunded_orderline_id)
+                isRefund = false
         });
         order.sum_vat_normal = sum_vat_normal;
         order.sum_vat_discounted_1 = sum_vat_discounted_1;
@@ -43,7 +46,7 @@ patch(PaymentScreen.prototype, {
         order.sum_vat_null = sum_vat_null;
         order.sum_vat_special = sum_vat_special;
 
-        const signature = await this.pos.data.call("pos.order", "sign_order", [order.serialize()]);
+        const signature = await this.pos.data.call("pos.order", "sign_order", [order.serialize(), isRefund]);
 
         order.certificate_serial_number = signature.certificate_serial_number
         order.prev_order_signature = signature.prev_order_signature
