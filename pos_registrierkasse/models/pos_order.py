@@ -92,7 +92,7 @@ class CustomPOSOrder(models.Model):
         }
 
     @api.model
-    def sign_order(self, order_data_dict):
+    def sign_order(self, order_data_dict, is_refund):
         session_id = order_data_dict.get('session_id')
         if not isinstance(session_id, int):
             return {'error': 'Invalid session_id in order_data_dict'}
@@ -105,7 +105,6 @@ class CustomPOSOrder(models.Model):
         if not config.exists() or not config.pos_use_registrierkasse:
             return {'rksv_signed': False, 'message': 'RKSV not active for this POS'}
 
-        is_refund = order_data_dict.get("has_refundable_lines", False)
         return self._get_rksv_signature(config, order_data_dict, is_refund=is_refund)
 
     @api.model

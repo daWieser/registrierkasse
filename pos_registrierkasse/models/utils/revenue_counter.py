@@ -9,10 +9,8 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 def encrypt_revenue_counter(revenue_counter: float, aes_key, pos_name, sequence_number):
     cipher = Cipher(algorithms.AES(b64decode(aes_key)), _init_vector(pos_name, sequence_number))
     encryptor = cipher.encryptor()
-    print(revenue_counter * 100)
 
     revenue_counter_cents = round(revenue_counter * 100)
-    print(revenue_counter_cents)
 
     # According to the detailed Specification, the length of a block needs to be 16 Bytes.
     # However for the qr code it needs to be 5 bytes. So the first 5 bytes of the revenue counter are filled
