@@ -99,6 +99,11 @@ class CustomPOSConfig(models.Model):
         if not pos_config_rec.receipt_sequence_id:
             pos_config_rec.receipt_sequence_id = self._create_sequence(pos_config_rec)
 
+        if not pos_config_rec.a_trust_user_name:
+            raise UserError("You need to specify a A-Trust user for a RKSV compliant POS")
+        if not pos_config_rec.a_trust_password:
+            raise UserError("You need to specify a A-Trust password for a RKSV compliant POS")
+
         # Step 1: A-Trust Login & Certificate Info (Specific to starting receipt setup)
         try:
             _logger.info(f"RKSV: Attempting A-Trust login for POS '{pos_config_rec.name}'.")

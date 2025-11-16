@@ -17,8 +17,8 @@
                 </xpath>
                 <xpath expr="//div[@id='title']" position="after">
                     <div title="RKSV Settings" class="row mt16 o_settings_container">
-                        <setting id="rskv_compliance" string="RSKV Compliance"
-                                 help="Make this POS RSKV compliant">
+                        <setting id="rksv_compliance" string="RKSV Compliance"
+                                 help="Make this POS RKSV compliant">
                             <field name="pos_use_registrierkasse"
                                    readonly="pos_rksv_lock"/>
                             <div class="content-group" invisible="not pos_use_registrierkasse">
