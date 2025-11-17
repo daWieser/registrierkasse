@@ -8,11 +8,12 @@ import {qrCodeSrc} from "@point_of_sale/utils";
 patch(PosOrder.prototype, {
     export_for_printing(baseUrl, headerData) {
         const results = super.export_for_printing(...arguments);
-        const code = this.machine_readable_code + "_" + this._base64UrlToBase64(this.order_signature);
-        results.pos_kasse_code = qrCodeSrc(code);
-        results.kassenidentifikationsnummer = this.config_id.name;
-        results.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
-
+        if(this.machine_readable_code) {
+            const code = this.machine_readable_code + "_" + this._base64UrlToBase64(this.order_signature);
+            results.pos_kasse_code = qrCodeSrc(code);
+            results.kassenidentifikationsnummer = this.config_id.name;
+            results.fortlaufendeBelegnummer = this.registrierkasse_receipt_number;
+        }
         return results;
     },
 
