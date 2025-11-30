@@ -32,7 +32,8 @@ class DatenErfassungsProtokollController(http.Controller):
 
     def _file_content(self, request, config):
         orders = request.env['pos.order'].search([
-            ('session_id.config_id', '=', config.id)
+            ('session_id.config_id', '=', config.id),
+            ('registrierkasse_receipt_number', '!=', 0)
         ], order='registrierkasse_receipt_number asc')
 
         orders_short = [jws_signature_compact(order.machine_readable_code, order.order_signature) for order in orders]
