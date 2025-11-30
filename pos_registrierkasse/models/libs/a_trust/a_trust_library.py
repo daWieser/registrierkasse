@@ -152,7 +152,8 @@ class ATrustMockProvider(ATrustProvider):
         return CertificateInformation(
             certificate_serial_number='1234567890ABC',
             signature_certificate='mock_signature_certificate',
-            certification_body=['mock_certification_body']
+            certification_body=['mock_certification_body'],
+            certificate_serial_number_binary="1234567890ABC"
         )
 
 

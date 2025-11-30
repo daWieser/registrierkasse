@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 
-import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_screen";
-import {patch} from '@web/core/utils/patch';
+import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
+import { patch } from '@web/core/utils/patch';
 
 
 patch(PaymentScreen.prototype, {
@@ -54,6 +54,7 @@ patch(PaymentScreen.prototype, {
         order.order_signature = signature.order_signature
         order.encrypted_revenue = signature.encrypted_revenue
         order.registrierkasse_receipt_number = signature.registrierkasse_receipt_number
+        order.date_order = signature.date_order;
 
         return super._finalizeValidation();
     }

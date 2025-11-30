@@ -48,9 +48,10 @@ class CustomPOSOrder(models.Model):
                 receipt_number
             )
 
-        date_order_str = order_vals.get('date_order')
-        if not isinstance(date_order_str, str):
-            date_order_str = fields.Datetime.to_string(fields.Datetime.now())
+        # ALWAYS use the current server time for the signature to ensure chronological order
+        # regardless of when the order was created (e.g. parked orders).
+        current_time = fields.Datetime.now()
+        date_order_str = fields.Datetime.to_string(current_time)
 
         prev_order_signature = chain_hash(prev_order)
 
@@ -89,6 +90,7 @@ class CustomPOSOrder(models.Model):
             'certificate_serial_number': config.certificate_serial_number,
             'prev_order_signature': prev_order_signature,
             'registrierkasse_receipt_number': receipt_number,
+            'date_order': date_order_str,
         }
 
     @api.model
