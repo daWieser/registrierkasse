@@ -15,7 +15,11 @@ from ..libs.a_trust.a_trust_library import SessionData, OrderData, LoginData
 ### env.cr.commit()
 
 def rebuild_dep(config, rehash_start=False):
-    orders = config.env['pos.order'].search([('session_id.config_id', '=', config.id)], order='registrierkasse_receipt_number asc')
+    orders = config.env['pos.order'].search([
+        ('session_id.config_id', '=', config.id),
+        ('registrierkasse_receipt_number', '!=', 0)
+    ], order='registrierkasse_receipt_number asc')
+
     revenue_counter = 0
 
     for order in orders:
