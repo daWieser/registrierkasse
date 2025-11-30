@@ -32,7 +32,11 @@ patch(PaymentScreen.prototype, {
                     sum_vat_discounted_2 += lineAmount;
                     break;
                 case 0:
-                    sum_vat_null += lineAmount;
+                    // Gift cards should be ignored for the purpose of the RKSV
+                    const program_type = line?.reward_id?.program_id?.program_type;
+                    if (program_type !== "gift_card" && program_type !== "ewallet" ) {
+                        sum_vat_null += lineAmount;
+                    }
                     break;
                 default:
                     sum_vat_special += lineAmount;
