@@ -184,7 +184,7 @@ class CustomPOSConfig(models.Model):
                 _logger.info(f"RKSV: Verifying starting receipt for '{pos_config_rec.name}' with FinanzOnline.")
                 client.verify_receipt(
                     customer_info=pos_config_rec.company_id.name,
-                    receipt_data=order.machine_readable_code,
+                    receipt_data=order.machine_readable_code + base64url_to_base64(order.order_signature),
                     transmission_type='T' if credentials.env == 'test' else 'P'
                 )
                 _logger.info(f"RKSV: Starting receipt for '{pos_config_rec.name}' verified successfully.")
@@ -283,7 +283,7 @@ class CustomPOSConfig(models.Model):
                         _logger.info(f"RKSV CRON: Verifying Jahresbeleg for '{self.name}' with FinanzOnline.")
                         if client.verify_receipt(
                             customer_info=self.company_id.name,
-                            receipt_data=order.machine_readable_code,
+                            receipt_data=order.machine_readable_code + base64url_to_base64(order.order_signature),
                             transmission_type='T' if credentials.env == 'test' else 'P'
                         ):
                             _logger.info(f"RKSV CRON: Jahresbeleg for '{self.name}' sent successfully to FinanzOnline.")
