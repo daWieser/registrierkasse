@@ -162,29 +162,12 @@ class CustomPOSConfig(models.Model):
         try:
             with FinanzOnlineClient(credentials) as client:
                 _logger.info(f"RKSV: Registering signatureinheit with certificate number '{certificate_serial_number_binary}' with FinanzOnline.")
-                client.register_se(
-                    customer_info=pos_config_rec.company_id.name,
-                    se_type="HSM_DIENSTLEISTER",
-                    vda_id='AT9' if credentials.env == 'test' else 'AT1',
-                    serial_number=certificate_serial_number_binary,
-                    transmission_type='T' if credentials.env == 'test' else 'P'
-                )
-                _logger.info(f"RKSV: Signatureinheit registered successfully.")
 
-                _logger.info(f"RKSV: Registering '{pos_config_rec.name}' with FinanzOnline.")
-                client.register_registrierkasse(
-                    kassen_id=pos_config_rec.name,
-                    customer_info=pos_config_rec.company_id.name,
-                    user_key=pos_config_rec.registrierkasse_aes_key,
-                    note="Initial registration",
-                    transmission_type='T' if credentials.env == 'test' else 'P'
-                )
-                _logger.info(f"RKSV: '{pos_config_rec.name}' registered successfully.")
 
                 _logger.info(f"RKSV: Verifying starting receipt for '{pos_config_rec.name}' with FinanzOnline.")
                 client.verify_receipt(
                     customer_info=pos_config_rec.company_id.name,
-                    receipt_data=order.machine_readable_code,
+                    receipt_data=order.machine_readable_code + "_" + base64url_to_base64(order.order_signature),
                     transmission_type='T' if credentials.env == 'test' else 'P'
                 )
                 _logger.info(f"RKSV: Starting receipt for '{pos_config_rec.name}' verified successfully.")
@@ -283,7 +266,7 @@ class CustomPOSConfig(models.Model):
                         _logger.info(f"RKSV CRON: Verifying Jahresbeleg for '{self.name}' with FinanzOnline.")
                         if client.verify_receipt(
                             customer_info=self.company_id.name,
-                            receipt_data=order.machine_readable_code,
+                            receipt_data=order.machine_readable_code + "_" + base64url_to_base64(order.order_signature),
                             transmission_type='T' if credentials.env == 'test' else 'P'
                         ):
                             _logger.info(f"RKSV CRON: Jahresbeleg for '{self.name}' sent successfully to FinanzOnline.")
