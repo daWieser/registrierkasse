@@ -21,7 +21,7 @@ class CustomPOSOrder(models.Model):
     sum_vat_discounted_2 = fields.Float(string='VAT Discounted 2', digits=(16, 2), required=True, default=0)
     sum_vat_null = fields.Float(string='VAT null', digits=(16, 2), required=True, default=0)
     sum_vat_special = fields.Float(string='VAT special', digits=(16, 2), required=True, default=0)
-    sum_total_rksv = fields.Float(string='Total sum', digits=(16, 2), required=True, default=0)  #
+    sum_total_rksv = fields.Float(string='Total sum', digits=(16, 2), required=True, default=0)
 
     def _generate_pos_reference(self, order):
         """Generate a consistent pos_reference for an order."""

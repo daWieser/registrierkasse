@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 
-import {PaymentScreen} from "@point_of_sale/app/screens/payment_screen/payment_screen";
-import {patch} from '@web/core/utils/patch';
+import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
+import { patch } from '@web/core/utils/patch';
 
 
 patch(PaymentScreen.prototype, {
@@ -11,7 +11,9 @@ patch(PaymentScreen.prototype, {
         const order = this.currentOrder;
         order.recomputeOrderData()
 
-        if (navigator.onLine) {
+        const has_lines = order.lines.some((line) => line.get_quantity() !== 0);
+
+        if (navigator.onLine && has_lines) {
             try {
                 let sum_vat_normal = 0;
                 let sum_vat_discounted_1 = 0;
