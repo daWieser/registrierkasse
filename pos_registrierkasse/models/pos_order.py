@@ -21,17 +21,22 @@ class CustomPOSOrder(models.Model):
     sum_vat_discounted_2 = fields.Float(string='VAT Discounted 2', digits=(16, 2), required=True, default=0)
     sum_vat_null = fields.Float(string='VAT null', digits=(16, 2), required=True, default=0)
     sum_vat_special = fields.Float(string='VAT special', digits=(16, 2), required=True, default=0)
+    sum_total_rksv = fields.Float(string='Total sum', digits=(16, 2), required=True, default=0)  #
 
     def _generate_pos_reference(self, order):
         """Generate a consistent pos_reference for an order."""
         order_sequence_in_session = self.search_count([('session_id', '=', order.session_id.id)])
         return (f"{order.session_id.id:05d}-"
-                  f"{order_sequence_in_session:03d}-"
-                  f"{order.registrierkasse_receipt_number:04d}")
+                f"{order_sequence_in_session:03d}-"
+                f"{order.registrierkasse_receipt_number:04d}")
 
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
-        config.revenue_counter += order_vals.get('amount_total', 0.0)
+        if "sum_total_rksv" in order_vals:
+            config.revenue_counter += order_vals.get('sum_total_rksv', 0.0)
+        else:
+            config.revenue_counter += order_vals.get('amount_total', 0.0)
+
         receipt_number = int(config.receipt_sequence_id.next_by_id())
 
         prev_order = self.env['pos.order'].search(
@@ -80,7 +85,8 @@ class CustomPOSOrder(models.Model):
                 'a_trust_session_key': a_trust_login_session.sessionKey,
                 'a_trust_session_id': a_trust_login_session.sessionId
             })
-            a_trust_session_data_obj_retry = SessionData(a_trust_login_session.sessionKey, a_trust_login_session.sessionId)
+            a_trust_session_data_obj_retry = SessionData(a_trust_login_session.sessionKey,
+                                                         a_trust_login_session.sessionId)
             order_signature = atrust_api.create_signature(a_trust_session_data_obj_retry, machine_readable_code)
 
         return {
@@ -93,6 +99,47 @@ class CustomPOSOrder(models.Model):
             'date_order': date_order_str,
         }
 
+    def _compute_rksv_sums(self, lines):
+        sums = {
+            'sum_vat_normal': 0.0,
+            'sum_vat_discounted_1': 0.0,
+            'sum_vat_discounted_2': 0.0,
+            'sum_vat_null': 0.0,
+            'sum_vat_special': 0.0,
+        }
+
+        for line in lines:
+            price = line.price_subtotal_incl
+            taxes = line.tax_ids
+
+            if taxes:
+                first_tax = taxes[0]
+                amount = first_tax.amount
+
+                if amount == 20:
+                    sums['sum_vat_normal'] += price
+                elif amount == 10:
+                    sums['sum_vat_discounted_1'] += price
+                elif amount == 13:
+                    sums['sum_vat_discounted_2'] += price
+                elif amount == 0:
+                    sums['sum_vat_null'] += price
+                else:
+                    sums['sum_vat_special'] += price
+            else:
+                sums['sum_vat_null'] += price
+
+        return sums
+
+    def _is_rksv_refund(self, lines):
+        is_refund = True
+        for line in lines:
+            refunded = line.refunded_orderline_id
+            if not refunded:
+                is_refund = False
+                break
+        return is_refund
+
     @api.model
     def sign_order(self, order_data_dict, is_refund):
         session_id = order_data_dict.get('session_id')
@@ -104,6 +151,9 @@ class CustomPOSOrder(models.Model):
             return {'error': f'Session {session_id} not found.'}
 
         config = session.config_id
+        if not config.exists() or not config.pos_use_registrierkasse:
+            return {'rksv_signed': False, 'message': 'RKSV not active for this POS'}
+
         if not config.exists() or not config.pos_use_registrierkasse:
             return {'rksv_signed': False, 'message': 'RKSV not active for this POS'}
 
@@ -175,5 +225,33 @@ class CustomPOSOrder(models.Model):
         """Prevent deletion of RKSV-signed orders."""
         for order in self:
             if order.registrierkasse_receipt_number:
-                raise UserError(_('Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann nicht gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung.'))
+                raise UserError(
+                    _('Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann nicht gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung.'))
         return super(CustomPOSOrder, self).unlink()
+
+    def action_retry_signing(self):
+        """Manually retry signing the order."""
+        for order in self:
+            if order.registrierkasse_receipt_number:
+                continue  # Already signed
+
+            config = order.session_id.config_id
+            if not config.pos_use_registrierkasse:
+                continue
+
+            # Calculate sums from existing order lines
+            sums = self._compute_rksv_sums(order.lines)
+
+            # Check is_refund
+            is_refund = self._is_rksv_refund(order.lines)
+
+            order_vals = {
+                'amount_total': order.amount_total,
+                **sums
+            }
+
+            try:
+                rksv_data = self._get_rksv_signature(config, order_vals, is_refund=is_refund)
+                order.write(rksv_data)
+            except Exception as e:
+                raise UserError(_("Signing failed: %s") % str(e))

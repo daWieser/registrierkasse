@@ -79,6 +79,7 @@ class CustomPOSConfig(models.Model):
         sequence = self.env['ir.sequence'].create({
             'name': f"POS Order Sequence for {pos_config.id}",
             'code': f'pos.order.{pos_config.id}',
+            'implementation': 'no_gap',
             'padding': 5,
             'use_date_range': False,
         })

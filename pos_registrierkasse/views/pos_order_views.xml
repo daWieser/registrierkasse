@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_order_form_registrierkasse" model="ir.ui.view">
+        <field name="name">pos.order.form.registrierkasse</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_retry_signing" string="Retry Signing" type="object"
+                    invisible="registrierkasse_receipt_number"
+                    groups="point_of_sale.group_pos_manager"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
