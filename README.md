@@ -12,61 +12,98 @@ Open source Odoo addon, to enable RKSV compliance in Odoo POS.
 
 ## Features
 
-*   **RKSV Compliance:** Enables your Odoo Point of Sale (POS) to comply with Austrian Registrierkassenpflicht (RKSV) regulations.
-*   **Automated Startbeleg Creation:** Automatically generates the initial "Startbeleg" (starting receipt) when a POS is configured for RKSV.
-*   **Configurable A-Trust API Environment:** Allows selection between Test and Production environments for A-Trust API communication directly from POS settings.
-*   **Automated Nullbeleg Generation:** Automatically creates monthly Nullbeleg receipts as required by law.
-*   **FinanzOnline Connection:** If a FinanzOnline webservice user is configured, new cash-registers are automatically registered with FinanzOnline. Additionally yearly Nullbelege are sent to FinanzOnline at the end of the year.
-*   **Stornobeleg Creation:** Supports the creation of Stornobelege (cancellation receipts) for RKSV compliance.
-*   **Datenerfassungsprotokoll Export:** Enables the export of the "Datenerfassungsprotokoll" (data capture protocol) for quarterly backups.
+*   **Full RKSV Compliance:** Seamlessly integrates with Odoo POS to meet all requirements of the Austrian *Registrierkassensicherheitsverordnung* (RKSV), including chain hashing and encrypted revenue counters.
+*   **A-Trust HSM Integration:** Built-in support for A-Trust's signing API with support for Test, Production, and QA environments.
+*   **Automated FinanzOnline (FON) Integration:**
+    *   **Automatic Registration:** Handles registration of cash registers and signature units directly via FON web services.
+    *   **Automatic Verification:** Automatically verifies the mandatory Startbeleg and Jahresbeleg.
+*   **Automated Compliance Cycles:**
+    *   **Monthly Nullbeleg:** Automatically generated via cron job at a configurable time.
+    *   **Yearly Jahresbeleg:** Automated generation and verification with FinanzOnline at the end of the year.
+*   **Audit-Ready DEP Export:** One-click export of the "Datenerfassungsprotokoll" (DEP) for quarterly backups and tax audits.
+*   **Enhanced Receipt Design:** Automatically includes the required QR code and RKSV-specific metadata on POS receipts.
+*   **Reliability & Security:** Manual retry mechanisms for signing resilience and immutable audit trails (prevents deletion of signed orders).
 
 ---
 
 ## Table of Contents
 
 - [How to Use](#how-to-use)
+  - [Prerequisites](#prerequisites)
   - [Enable RKSV Compliance on your POS](#enable-rksv-compliance-on-your-pos)
   - [RKSV Configuration Options](#rksv-configuration-options)
-- [Nullbeleg](#nullbeleg)
-- [Datenerfassungsprotokoll](#datenerfassungsprotokoll)
+  - [FinanzOnline Configuration](#finanzonline-configuration)
+- [Compliance Procedures](#compliance-procedures)
+  - [Nullbeleg (Monthly/Yearly)](#nullbeleg-monthlyyearly)
+  - [Datenerfassungsprotokoll (DEP)](#datenerfassungsprotokoll-dep)
+- [Support](#support)
 
 ---
 
 ## How to Use
 
+### Prerequisites
+
+To comply with Austrian law, a signature certificate from A-Trust is required. This certificate can be obtained via [office@vorstieg.eu](mailto:office@vorstieg.eu).
+
 ### Enable RKSV Compliance on your POS
 
-To comply with Austrian law, a signature certificate from A-Trust is required. This certificate can be obtained from [office@vorstieg.eu](mailto:office@vorstieg.eu).
-
-Upon saving the POS with RKSV enabled, a Startbeleg is automatically created and can be registered using the "BMF Belegchek" app.
+1.  Navigate to **Point of Sale > Configuration > Settings**.
+2.  Enable the **Austrian RKSV** option.
+3.  Enter your A-Trust credentials and select the appropriate environment (Test/Production/QA).
+4.  Upon saving, the module will automatically:
+    *   Generate a unique AES key for your revenue counter.
+    *   Initialize the receipt sequence.
+    *   Create and sign the **Startbeleg**.
+    *   (Optional) Register everything with FinanzOnline if configured.
 
 ![screenshot RKSV settings](./pos_registrierkasse/static/description/rksv_1.png)
 
 ### RKSV Configuration Options
 
-*   **A-Trust User Name:** The username for authenticating with the A-Trust API.
-*   **A-Trust Password:** The password for authenticating with the A-Trust API.
-*   **Umsatzzähler AES (AES Key):** An automatically generated AES key used for encrypting the revenue counter. This key must be registered with Finanzonline.
-*   **Umsatzzähler AES Prüfsumme (AES Key Checksum):** A checksum for the generated AES key, used for verification.
-*   **A-Trust Environment:** Select between Test or Production environments for A-Trust API communication.
-*   **Time for Nullbeleg:** Specify the time of day for the monthly Nullbeleg cron job, which runs on the last day of each month.
+*   **A-Trust User Name/Password:** Your credentials for the A-Trust RK-Online API.
+*   **Umsatzzähler AES:** An automatically generated 256-bit key for revenue encryption.
+*   **A-Trust Environment:** Choose between *Test*, *Production*, or *QA (Abnahme)*.
+*   **Time for Nullbeleg:** Set the preferred execution time for the monthly automated zero-receipt.
+
+### FinanzOnline Configuration
+
+To enable automated registration and verification, configure the FinanzOnline (FON) parameters in the Settings:
+*   `pos_registrierkasse.fon_tid`: Participant ID (Teilnehmer-Identifikation).
+*   `pos_registrierkasse.fon_benid`: User ID (Benutzer-Identifikation).
+*   `pos_registrierkasse.fon_pin`: User PIN.
+
+If you want your new POS to be automatically registered in FON, you need to configure this BEFORE creating the POS.
 
 ---
 
-## Nullbeleg
+## Compliance Procedures
 
-When the RKSV option is enabled on any POS, a Nullbelegprodukt is automatically created. This product is essential for the Startbeleg, as well as for the monthly and yearly end receipts.
+### Nullbeleg (Monthly/Yearly)
 
-In situations where an officer of the financial police inspects the POS, it is necessary to create an empty receipt using this product.
+A "Nullbeleg" (zero-value receipt) is required at the end of every month and year. This module automates this process using an Odoo Cron Job.
+
+*   **Monthly:** Automatically created on the last day of each month.
+*   **Yearly (Jahresbeleg):** Created on December 31st and automatically transmitted to FinanzOnline for verification.
+
+Manual creation is also possible using the "Nullbelegprodukt" created by the module.
 
 ![screenshot with Nullbeleg](./pos_registrierkasse/static/description/rksv_2.png)
 
-An automated task (cron job) is included in this module to create the monthly Nullbeleg. It is highly recommended to configure this job to run during non-business hours to avoid interfering with active POS sessions.
+### Datenerfassungsprotokoll (DEP)
+
+Austrian law requires a quarterly backup of all signed receipts.
+1.  Go to the POS Dashboard.
+2.  Click the three dots (menu) on your POS card.
+3.  Select **Download DEP**.
+
+![screenshot with Datenerfassungsprotokoll](./pos_registrierkasse/static/description/rksv_3.png)
 
 ---
 
-## Datenerfassungsprotokoll
+## Support
 
-According to Austrian law, all receipts must be exported and backed up once per quarter. This can be done by exporting the Datenerfassungsprotokoll for each POS.
-
-![screenshot with Datenerfassungsprotokoll](./pos_registrierkasse/static/description/rksv_3.png)
+For technical support, integration assistance, or to obtain A-Trust certificates, please contact:
+**Vorstieg Software FlexCo**
+Website: [https://registrierkasse.vorstieg.eu](https://registrierkasse.vorstieg.eu)
+Email: [office@vorstieg.eu](mailto:office@vorstieg.eu)

@@ -35,5 +35,4 @@
         'views/point_of_sale_dashboard.xml',
         'views/res_config_settings_view.xml',
     ],
-    'i18n': ['i18n/de.po'],
 }
