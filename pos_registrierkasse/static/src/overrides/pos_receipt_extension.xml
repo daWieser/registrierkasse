@@ -11,6 +11,11 @@
                     Fortlaufende Belegnummer:<t t-esc="props.data.fortlaufendeBelegnummer" />
                 </div>
             </t>
+            <t t-elif="props.data.pos_use_registrierkasse">
+                <div class="pos-receipt-order-data">
+                    Sicherheitseinrichtung ausgefallen
+                </div>
+            </t>
         </xpath>
     </t>
 </templates>

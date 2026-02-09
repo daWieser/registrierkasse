@@ -45,7 +45,7 @@
                                 <div class="row mt16" invisible="a_trust_environment == 'test'">
                                     <label for="a_trust_password" string="A Trust Password"
                                            class="col-lg-4 o_light_label"/>
-                                    <field name="a_trust_password"/>
+                                    <field name="a_trust_password" password="True"/>
                                 </div>
                                 <div class="row mt16">
                                     <label for="monthly_nullbeleg_time" string="Time for Nullbeleg"
