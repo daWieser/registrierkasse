@@ -36,5 +36,4 @@
         'views/res_config_settings_view.xml',
         'views/pos_order_views.xml',
     ],
-    'i18n': ['i18n/de.po'],
 }

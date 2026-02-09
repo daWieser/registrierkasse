@@ -1,77 +1,374 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#   * pos_registrierkasse
+# 	* pos_registrierkasse
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0alpha1"
-"Report-Msgid-Bugs-To: "
-"POT-Creation-Date: 2025-08-07 17:00+0000"
-"PO-Revision-Date: 2025-08-07 17:00+0000"
-"Last-Translator: "
-"Language-Team: "
-"MIME-Version: 1.0"
-"Content-Type: text/plain; charset=UTF-8"
-"Content-Transfer-Encoding: 8bit"
-"X-Generator: Odoo"
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-06 17:58+0000\n"
+"PO-Revision-Date: 2026-02-06 17:58+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "FinanzOnline (Austria)"
-msgstr "FinanzOnline (Österreich)"
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "<span>RKSV</span>"
+msgstr "<span>RKSV</span>"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "FinanzOnline Credentials"
-msgstr "FinanzOnline Zugangsdaten"
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "A Trust Password"
+msgstr "A-Trust Passwort"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "Credentials for the Austrian FinanzOnline web service. These settings are global for all PoS."
-msgstr "Zugangsdaten für den österreichischen FinanzOnline Webservice. Diese Einstellungen sind global für alle PoS."
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "A Trust User"
+msgstr "A-Trust Benutzer"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_config__a_trust_environment__qa
+msgid "A-Trust Abnahme Environment"
+msgstr "A-Trust Abnahme Umgebung (QA)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__certificate_serial_number
+msgid "A-Trust Certificate Serial Number"
+msgstr "A-Trust Zertifikat-Seriennummer"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__a_trust_environment
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "A-Trust Environment"
+msgstr "A-Trust Umgebung"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__a_trust_password
+msgid "A-Trust Password"
+msgstr "A-Trust Passwort"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__a_trust_session_id
+msgid "A-Trust Session Id"
+msgstr "A-Trust Sitzungs-ID"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__a_trust_session_key
+msgid "A-Trust Session Key"
+msgstr "A-Trust Sitzungsschlüssel"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__a_trust_user_name
+msgid "A-Trust User Name"
+msgstr "A-Trust Benutzername"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "AES Key Checksum"
+msgstr "AES Schlüssel Prüfsumme"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "AES Key for Revenue Counter"
+msgstr "AES Schlüssel für Umsatzzähler"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Activate FinanzOnline-Integration"
+msgstr "FinanzOnline-Integration aktivieren"
+
+#. module: pos_registrierkasse
+#: model:ir.model,name:pos_registrierkasse.model_res_config_settings
+msgid "Config Settings"
+msgstr "Konfigurationseinstellungen"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid ""
+"Credentials for the Austrian FinanzOnline web service. These settings are "
+"global for all PoS."
+msgstr ""
+"Zugangsdaten für den österreichischen FinanzOnline Webservice. Diese "
+"Einstellungen gelten global für alle PoS."
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "Data Recording Protocol"
+msgstr "Datenerfassungsprotokoll"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__pos_use_registrierkasse
+msgid "Does this POS use the RKSV module"
+msgstr "RKSV Modul für diesen POS verwenden"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid ""
+"Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann nicht "
+"gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
+msgstr ""
+"Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann nicht "
+"gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__encrypted_revenue
+msgid "Encrypted revenue counter"
+msgstr "Verschlüsselter Umsatzzähler"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
 msgid "FinanzOnline Environment"
 msgstr "FinanzOnline Umgebung"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "Test Environment"
-msgstr "Test Umgebung"
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_res_config_settings__fon_active
+msgid "Fon Active"
+msgstr "FON Aktiv"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "Production Environment"
-msgstr "Produktions Umgebung"
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_res_config_settings__fon_benid
+msgid "Fon Benid"
+msgstr "FON Benutzer-ID"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_res_config_settings__fon_environment
+msgid "Fon Environment"
+msgstr "FON Umgebung"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_res_config_settings__fon_herstellerid
+msgid "Fon Herstellerid"
+msgstr "FON Hersteller-ID"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_res_config_settings__fon_pin
+msgid "Fon Pin"
+msgstr "FON Pin"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_res_config_settings__fon_tid
+msgid "Fon Tid"
+msgstr "FON Teilnehmer-ID"
+
+#. module: pos_registrierkasse
+#. odoo-javascript
+#: code:addons/pos_registrierkasse/static/src/overrides/pos_receipt_extension.xml:0
+msgid "Fortlaufende Belegnummer:"
+msgstr "Fortlaufende Belegnummer:"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Global Settings"
+msgstr "Globale Einstellungen"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__pos_rksv_lock
+msgid "If this lock is set, RKSV settings can not be changed"
+msgstr "RKSV Einstellungen gesperrt"
+
+#. module: pos_registrierkasse
+#. odoo-javascript
+#: code:addons/pos_registrierkasse/static/src/overrides/pos_receipt_extension.xml:0
+msgid "Kassenidentifikationsnummer:"
+msgstr "Kassenidentifikationsnummer:"
+
+#. module: pos_registrierkasse
+#. odoo-javascript
+#: code:addons/pos_registrierkasse/static/src/overrides/customer_display_override.xml:0
+msgid "Logo"
+msgstr "Logo"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "Make this POS RKSV compliant"
+msgstr "Diesen POS RKSV-konform machen"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
 msgid "Participant ID"
-msgstr "Teilnehmer ID"
+msgstr "Teilnehmer-ID"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "User ID"
-msgstr "Benutzer ID"
-
-#. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
 msgid "Pin"
 msgstr "Pin"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "Supplier ID"
-msgstr "Hersteller ID"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
-msgid "Powered by Odoo"
-msgstr "Powered by Odoo und Vorstieg Software"
+#: model:ir.model,name:pos_registrierkasse.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr "Point of Sale Konfiguration"
 
 #. module: pos_registrierkasse
-#: model:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
-msgid "Global Settings"
-msgstr "Globale Einstellungen"
+#: model:ir.model,name:pos_registrierkasse.model_pos_order
+msgid "Point of Sale Orders"
+msgstr "Point of Sale Bestellungen"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_config__a_trust_environment__production
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__res_config_settings__fon_environment__production
+msgid "Production Environment"
+msgstr "Produktionsumgebung"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "RKSV Compliance"
+msgstr "RKSV Konformität"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "RKSV Settings"
+msgstr "RKSV Einstellungen"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__receipt_sequence_id
+msgid "Receipt IDs Sequence"
+msgstr "Belegnummernkreis"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_form_registrierkasse
+msgid "Retry Signing"
+msgstr "Signatur erneut versuchen"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__registrierkasse_receipt_number
+msgid "Sequence of receipt specific to RKSV"
+msgstr "RKSV Belegnummer "
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__certificate_serial_number
+msgid "Serial number of the certificate"
+msgstr "Seriennummer des Zertifikats "
+
+#. module: pos_registrierkasse
+#. odoo-javascript
+#: code:addons/pos_registrierkasse/static/src/overrides/pos_receipt_extension.xml:0
+msgid "Sicherheitseinrichtung ausgefallen"
+msgstr "Sicherheitseinrichtung ausgefallen"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__order_signature
+msgid "Signature from signing unit"
+msgstr "Signatur der Signaturerstellungseinheit"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__prev_order_signature
+msgid "Signature of the previous invoice"
+msgstr "Signatur des vorhergehenden Belegs"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__signature_certificate
+msgid "Signaturzertifikat for Beleg Gruppe"
+msgstr "Signaturzertifikat"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid "Signing failed: %s"
+msgstr "Signierung fehlgeschlagen: %s"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "Supplier ID"
+msgstr "Hersteller-ID"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_config__a_trust_environment__test
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__res_config_settings__fon_environment__test
+msgid "Test Environment"
+msgstr "Testumgebung"
+
+#. module: pos_registrierkasse
+#: model:ir.model.constraint,message:pos_registrierkasse.constraint_pos_config_unique_name
+msgid "The name of the POS must be unique!"
+msgstr "Der Name des POS muss eindeutig sein!"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__machine_readable_code
+msgid "The whole code sent to A-Trust"
+msgstr "Maschinenlesbarer Code"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,help:pos_registrierkasse.field_pos_config__receipt_sequence_id
+msgid ""
+"This sequence is automatically created by Odoo but you can change it to "
+"customize the reference numbers of your orders."
+msgstr ""
+"Dieser Nummernkreis wird automatisch von Odoo erstellt, kann aber zur "
+"Anpassung der Belegnummern geändert werden."
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__monthly_nullbeleg_time
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "Time for Nullbeleg"
+msgstr "Zeitpunkt für Nullbeleg"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__revenue_counter
+msgid "Total"
+msgstr "Umsatzzähler"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_total_rksv
+msgid "Total sum"
+msgstr "Gesamtsumme"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__registrierkasse_aes_key
+msgid "Umsatzzähler AES"
+msgstr "AES Schlüssel für Umsatzzähler"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__registrierkasse_aes_key_checksum
+msgid "Umsatzzähler AES Prüfsumme"
+msgstr "AES Schlüssel Prüfsumme"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
+msgid "User ID"
+msgstr "Benutzer-ID"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_discounted_1
+msgid "VAT Discounted 1"
+msgstr "Ermäßigt 1 (10%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_discounted_2
+msgid "VAT Discounted 2"
+msgstr "Ermäßigt 2 (13%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_normal
+msgid "VAT Normal"
+msgstr "Normalsteuer (20%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_null
+msgid "VAT null"
+msgstr "Nullsteuer (0%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_special
+msgid "VAT special"
+msgstr "Sondersteuer"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__certificate_certification_body
+msgid "Zertifizierungsstellen for Beleg Gruppe"
+msgstr "Zertifizierungsstellen"
+
+#. module: pos_registrierkasse
+#. odoo-javascript
+#: code:addons/pos_registrierkasse/static/src/overrides/customer_display_override.xml:0
+msgid "and"
+msgstr "und"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "e.g. NYC Shop"
+msgstr "z.B. NYC Shop"

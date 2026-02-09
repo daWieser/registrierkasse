@@ -13,7 +13,7 @@ class CustomPOSOrder(models.Model):
     order_signature = fields.Char(string='Signature from signing unit', translate=True)
     prev_order_signature = fields.Char(string='Signature of the previous invoice', translate=True)
     machine_readable_code = fields.Char(string='The whole code sent to A-Trust', translate=True)
-    certificate_serial_number = fields.Char(string='Serial number of the ', translate=True)
+    certificate_serial_number = fields.Char(string='Serial number of the certificate', translate=True)
     registrierkasse_receipt_number = fields.Integer(string='Sequence of receipt specific to RKSV ', index=True)
 
     sum_vat_normal = fields.Float(string='VAT Normal', digits=(16, 2), required=True, default=0)
