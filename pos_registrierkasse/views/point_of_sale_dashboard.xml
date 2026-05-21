@@ -5,15 +5,18 @@
             <field name="model">pos.config</field>
             <field name="inherit_id" ref="point_of_sale.view_pos_config_kanban"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[contains(@class,'dropdown-pos-config')]" position="inside"/>
-                <div class="col-6 o_kanban_manage_view">
-                    <h5 role="menuitem" class="o_kanban_card_manage_title">
-                        <span>RKSV</span>
-                    </h5>
-                    <div role="menuitem">
-                        <button name="action_download_daten_erfassungs_protokoll" type="object" string="Data Recording Protocol"/>
+                <xpath expr="//t[@t-name='menu']/div/div" position="after">
+                    <div class="row" style="min-width:200px" invisible="not pos_use_registrierkasse">
+                        <div class="col-6 o_kanban_manage_view">
+                            <h5 role="menuitem" class="o_kanban_card_manage_title">
+                                <span>RKSV</span>
+                            </h5>
+                            <div role="menuitem">
+                                <a name="action_download_daten_erfassungs_protokoll" type="object" string="Data Recording Protocol"/>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </xpath>
             </field>
         </record>
     </data>
