@@ -6,14 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-06 17:58+0000\n"
-"PO-Revision-Date: 2026-02-06 17:58+0000\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2026-05-22 05:01+0000\n"
+"PO-Revision-Date: 2026-05-22 07:03+0200\n"
+"Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Plural-Forms: \n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.9\n"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
@@ -80,6 +82,12 @@ msgstr "AES Schlüssel für Umsatzzähler"
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
 msgid "Activate FinanzOnline-Integration"
 msgstr "FinanzOnline-Integration aktivieren"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "Automatic Null Receipt booking from RKSV"
+msgstr "Automatische Nullbeleg Buchung der Registrierkasse"
 
 #. module: pos_registrierkasse
 #: model:ir.model,name:pos_registrierkasse.model_res_config_settings
@@ -189,6 +197,12 @@ msgid "Make this POS RKSV compliant"
 msgstr "Diesen POS RKSV-konform machen"
 
 #. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "Monthly Null Receipt Session"
+msgstr "Monatliche Nullbeleg Sitzung"
+
+#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
 msgid "Participant ID"
 msgstr "Teilnehmer-ID"
@@ -270,6 +284,12 @@ msgstr "Signaturzertifikat"
 #: code:addons/pos_registrierkasse/models/pos_order.py:0
 msgid "Signing failed: %s"
 msgstr "Signierung fehlgeschlagen: %s"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "Starting Receipt Session"
+msgstr "Startbeleg Sitzung"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form

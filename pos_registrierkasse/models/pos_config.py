@@ -1,6 +1,6 @@
 import json
 import logging
-from odoo import api, models, fields
+from odoo import _, api, models, fields
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
@@ -77,7 +77,7 @@ class CustomPOSConfig(models.Model):
 
     def _create_sequence(self, pos_config):
         sequence = self.env['ir.sequence'].create({
-            'name': f"POS Order Sequence for {pos_config.id}",
+            'name': f"POS Order Sequence for {pos_config.name}",
             'code': f'pos.order.{pos_config.id}',
             'implementation': 'no_gap',
             'padding': 5,
@@ -126,7 +126,7 @@ class CustomPOSConfig(models.Model):
                 f"A-Trust setup failed for '{pos_config_rec.name}'. Starting receipt not created. Error: {e}")
 
         # Step 2: Create Session & Order
-        pos_session = self._rksv_create_pos_session(pos_config_rec, "Starting Receipt Session")
+        pos_session = self._rksv_create_pos_session(pos_config_rec, _("Starting Receipt Session"))
         receipt_num = int(pos_config_rec.receipt_sequence_id.next_by_id())
         order_date_obj = fields.Datetime.now()
         initial_prev_order_sig_hash = hash_signature(pos_config_rec.name)  # Special for first receipt
@@ -247,7 +247,7 @@ class CustomPOSConfig(models.Model):
         pos_session = None
         try:
             # Step 1: Create Session & Order
-            pos_session = self._rksv_create_pos_session(self, "Monthly Null Receipt Session")
+            pos_session = self._rksv_create_pos_session(self, _("Monthly Null Receipt Session"))
             receipt_num = int(self.receipt_sequence_id.next_by_id())
             order_date_obj = fields.Datetime.now()
 
@@ -297,7 +297,7 @@ class CustomPOSConfig(models.Model):
             _logger.error(f"RKSV CRON: Error processing POS Config '{self.name}': {e}", exc_info=True)
         finally:
             if (pos_session and pos_session.exists()
-                    and pos_session.name == f'Monthly Null Receipt Session - {self.name}'
+                    and pos_session.opening_notes == _("Monthly Null Receipt Session")
                     and pos_session.state != 'closed'):
                 pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
                 _logger.info(f"RKSV CRON: Closed POS Session (ID: {pos_session.id})")
@@ -330,7 +330,7 @@ class CustomPOSConfig(models.Model):
             'target': 'self',
         }
 
-    def _rksv_create_pos_session(self, pos_config_rec, session_name_prefix):
+    def _rksv_create_pos_session(self, pos_config_rec, opening_notes):
         """
         Checks whether there is already an open POS sessions for the given config.
         If yes, it returns this session. If no, it creates a new one.
@@ -346,11 +346,12 @@ class CustomPOSConfig(models.Model):
             return open_sessions[-1]
 
         pos_session = self.env['pos.session'].create({
-            'name': f'{session_name_prefix} - {pos_config_rec.name}',
             'config_id': pos_config_rec.id,
             'user_id': self.env.user.id,
             'start_at': fields.Datetime.now(),
+            'opening_notes': opening_notes,
         })
+        pos_session.name = self.env['ir.sequence'].with_context(company_id=pos_config_rec.company_id.id).next_by_code('pos.session')
         _logger.info(f"RKSV: Created POS Session '{pos_session.name}' (ID: {pos_session.id})")
         return pos_session
 
@@ -368,6 +369,7 @@ class CustomPOSConfig(models.Model):
             'certificate_serial_number': pos_config_rec.certificate_serial_number,
             'prev_order_signature': prev_signature_hash_for_order_field,
             'pos_reference': f"{pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
+            'general_note': _("Automatic Null Receipt booking from RKSV"),
             'state': 'done'
         })
         _logger.info(f"RKSV: Created POS Order (ID: {order.id}, Name: {order.name}) with number {receipt_num}.")
