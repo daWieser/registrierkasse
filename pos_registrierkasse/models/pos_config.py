@@ -23,8 +23,8 @@ class CustomPOSConfig(models.Model):
                                                "to customize the reference numbers of your orders.", copy=False,
                                           ondelete='restrict')
 
-    registrierkasse_aes_key = fields.Char(string='Umsatzzähler AES', translate=True)
-    registrierkasse_aes_key_checksum = fields.Char(string='Umsatzzähler AES Prüfsumme', translate=True)
+    registrierkasse_aes_key = fields.Char('Umsatzzähler AES')
+    registrierkasse_aes_key_checksum = fields.Char('Umsatzzähler AES Prüfsumme', compute="_calculate_aes_key_checksum")
     revenue_counter = fields.Float(string='Total', digits=0, default=0)
 
     a_trust_user_name = fields.Char(string='A-Trust User Name')
@@ -317,9 +317,14 @@ class CustomPOSConfig(models.Model):
         for record in self:
             if record.pos_use_registrierkasse and not record.registrierkasse_aes_key:  # only if RKSV is true AND key is missing
                 record.registrierkasse_aes_key = generate_aes_key()
-                record.registrierkasse_aes_key_checksum = generate_aes_checksum(record.registrierkasse_aes_key)
             elif not record.pos_use_registrierkasse:  # Clear keys if RKSV is turned off
                 record.registrierkasse_aes_key = False
+
+    def _calculate_aes_key_checksum(self):
+        for record in self:
+            if record.pos_use_registrierkasse and record.registrierkasse_aes_key:
+                record.registrierkasse_aes_key_checksum = generate_aes_checksum(record.registrierkasse_aes_key)
+            else:
                 record.registrierkasse_aes_key_checksum = False
 
     def action_download_daten_erfassungs_protokoll(self):
