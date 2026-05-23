@@ -6,15 +6,13 @@ import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-def encrypt_revenue_counter(revenue_counter: float, aes_key, pos_name, sequence_number):
+def encrypt_revenue_counter(revenue_counter: int, aes_key, pos_name, sequence_number):
     cipher = Cipher(algorithms.AES(b64decode(aes_key)), _init_vector(pos_name, sequence_number))
     encryptor = cipher.encryptor()
 
-    revenue_counter_cents = round(revenue_counter * 100)
-
     # According to the detailed Specification, the length of a block needs to be 16 Bytes.
     # However for the qr code it needs to be 5 bytes. So the first 5 bytes of the revenue counter are filled
-    data = revenue_counter_cents.to_bytes(5, byteorder='big', signed=True) + b'\x00' * 11
+    data = revenue_counter.to_bytes(5, byteorder='big', signed=True) + b'\x00' * 11
 
     encrypted = (encryptor.update(data) + encryptor.finalize())[:5]
     return b64encode(encrypted).decode('utf-8')
@@ -44,7 +42,7 @@ class PosUtilsTest(unittest.TestCase):
                           "Init vector string")
 
     def test_revenue_counter(self):
-        self.assertEqual(encrypt_revenue_counter(0.0,
+        self.assertEqual(encrypt_revenue_counter(0,
                                                  "mWSdfdY96cjlFE5+eKCzcXinWuBzhJvmMJ60QRvBJLI=",
                                                  "demokasse42",
                                                  1),
@@ -52,7 +50,7 @@ class PosUtilsTest(unittest.TestCase):
                          "Revenue counter 0")
 
     def test_decrypt_revenue_counter_zero(self):
-        encrypted = b64decode(encrypt_revenue_counter(0.0,
+        encrypted = b64decode(encrypt_revenue_counter(0,
                                                       self.AES_KEY,
                                                       "DEMO-CASH-BOX",
                                                       1))
@@ -62,7 +60,7 @@ class PosUtilsTest(unittest.TestCase):
         self.assertEqual(int_value, 0)
 
     def test_decrypt_revenue_counter_negatuve(self):
-        encrypted = b64decode(encrypt_revenue_counter(-10.0,
+        encrypted = b64decode(encrypt_revenue_counter(-1000,
                                                       self.AES_KEY,
                                                       "DEMO-CASH-BOX",
                                                       1))
@@ -72,7 +70,7 @@ class PosUtilsTest(unittest.TestCase):
         self.assertEqual(int_value, -1000)
 
     def test_decrypt_revenue_counter_positive(self):
-        encrypted = b64decode(encrypt_revenue_counter(22.0,
+        encrypted = b64decode(encrypt_revenue_counter(2200,
                                                       self.AES_KEY,
                                                       "DEMO-CASH-BOX",
                                                       1))
@@ -82,7 +80,7 @@ class PosUtilsTest(unittest.TestCase):
         self.assertEqual(int_value, 2200)
 
     def test_decrypt_revenue_counter_after_addition_with_one_decimal_place(self):
-        encrypted = b64decode(encrypt_revenue_counter(1.2 + 2.4,
+        encrypted = b64decode(encrypt_revenue_counter(120 + 240,
                                                       self.AES_KEY,
                                                       "DEMO-CASH-BOX",
                                                       1))
@@ -92,7 +90,7 @@ class PosUtilsTest(unittest.TestCase):
         self.assertEqual(int_value, 360)
 
     def test_decrypt_revenue_counter_after_addition_with_two_decimal_places(self):
-        encrypted = b64decode(encrypt_revenue_counter(3.33 + 3.11,
+        encrypted = b64decode(encrypt_revenue_counter(333 + 311,
                                                       self.AES_KEY,
                                                       "DEMO-CASH-BOX",
                                                       1))

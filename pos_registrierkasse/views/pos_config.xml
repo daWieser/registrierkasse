@@ -31,6 +31,9 @@
                                            class="col-lg-4 o_light_label"/>
                                     <field name="registrierkasse_aes_key_checksum" class="col-lg-4"
                                            readonly="true"/>
+                                    <label for="display_revenue_counter" string="Revenue Counter"
+                                           class="col-lg-4 o_light_label" invisible="not pos_rksv_lock"/>
+                                    <field name="display_revenue_counter" class="col-lg-4" invisible="not pos_rksv_lock"/>
                                 </div>
                                 <div class="row mt16">
                                     <label for="a_trust_environment" string="A-Trust Environment"
@@ -57,6 +60,17 @@
                         </setting>
                     </div>
                 </xpath>
+            </field>
+        </record>
+
+        <record id="view_pos_config_tree_registrierkasse" model="ir.ui.view">
+            <field name="name">pos.config.list.view.registrierkasse</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_config_tree"/>
+            <field name="arch" type="xml">
+                <field name="last_session_closing_cash" position="after">
+                    <field name="display_revenue_counter" widget="monetary" invisible="not pos_use_registrierkasse" optional="hide" />
+                </field>
             </field>
         </record>
     </data>

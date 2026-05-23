@@ -31,7 +31,11 @@ def rebuild_dep(config, rehash_start=False):
                 order.machine_readable_code = split_mrc(order.machine_readable_code)
                 continue
         else:
-            revenue_counter += order.sum_vat_normal + order.sum_vat_discounted_1 + order.sum_vat_discounted_2 + order.sum_vat_null + order.sum_vat_special
+            revenue_counter += int(order.sum_vat_normal * 100.0) \
+                + int(order.sum_vat_discounted_1 * 100.0) \
+                + int(order.sum_vat_discounted_2 * 100.0) \
+                + int(order.sum_vat_null * 100.0) \
+                + int(order.sum_vat_special * 100.0)
 
             prev_order = config.env['pos.order'].search(
                 [('registrierkasse_receipt_number', '=', int(receipt_number) - 1),
@@ -50,7 +54,7 @@ def rebuild_dep(config, rehash_start=False):
 
         order.machine_readable_code = OrderData(
             config.name,
-            receipt_number,
+            str(receipt_number),
             format_order_date(str(order.date_order)),
             order.sum_vat_normal,
             order.sum_vat_discounted_1,

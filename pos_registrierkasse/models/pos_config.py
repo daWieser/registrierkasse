@@ -25,7 +25,8 @@ class CustomPOSConfig(models.Model):
 
     registrierkasse_aes_key = fields.Char(string='Umsatzzähler AES', translate=True)
     registrierkasse_aes_key_checksum = fields.Char(string='Umsatzzähler AES Prüfsumme', translate=True)
-    revenue_counter = fields.Float(string='Total', digits=0, default=0)
+    revenue_counter = fields.Integer(string='Internal Revenue Counter', default=0, copy=False)
+    display_revenue_counter = fields.Float("RKSV Revenue Counter", compute="_display_revenue_counter")
 
     a_trust_user_name = fields.Char(string='A-Trust User Name')
     a_trust_password = fields.Char(string='A-Trust Password')
@@ -84,6 +85,10 @@ class CustomPOSConfig(models.Model):
             'use_date_range': False,
         })
         return sequence
+
+    def _display_revenue_counter(self):
+        for record in self:
+            record.display_revenue_counter = record.revenue_counter / 100.0
 
     def _get_null_product(self):
         product_tmpl = self.env['product.template'].search([('name', '=', 'Nullbelegprodukt')], limit=1)

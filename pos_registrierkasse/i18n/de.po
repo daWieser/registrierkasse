@@ -172,6 +172,11 @@ msgid "If this lock is set, RKSV settings can not be changed"
 msgstr "RKSV Einstellungen gesperrt"
 
 #. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__revenue_counter
+msgid "Internal Revenue Counter"
+msgstr "Interner Umsatzzähler"
+
+#. module: pos_registrierkasse
 #. odoo-javascript
 #: code:addons/pos_registrierkasse/static/src/overrides/pos_receipt_extension.xml:0
 msgid "Kassenidentifikationsnummer:"
@@ -291,6 +296,11 @@ msgstr "Der Name des POS muss eindeutig sein!"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__machine_readable_code
 msgid "The whole code sent to A-Trust"
 msgstr "Maschinenlesbarer Code"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__display_revenue_counter
+msgid "RKSV Revenue Counter"
+msgstr "Umsatzzähler"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,help:pos_registrierkasse.field_pos_config__receipt_sequence_id
