@@ -25,7 +25,7 @@ class CustomPOSConfig(models.Model):
 
     registrierkasse_aes_key = fields.Char('Umsatzzähler AES')
     registrierkasse_aes_key_checksum = fields.Char('Umsatzzähler AES Prüfsumme', compute="_calculate_aes_key_checksum")
-    revenue_counter = fields.Integer(string='Revenue Counter', default=0)
+    revenue_counter = fields.Float(string='Total', digits=0, default=0)
 
     a_trust_user_name = fields.Char(string='A-Trust User Name')
     a_trust_password = fields.Char(string='A-Trust Password')
