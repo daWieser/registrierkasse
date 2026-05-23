@@ -33,9 +33,9 @@ class CustomPOSOrder(models.Model):
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
         if "sum_total_rksv" in order_vals:
-            config.revenue_counter += order_vals.get('sum_total_rksv', 0.0)
+            config.revenue_counter += order_vals.get('sum_total_rksv', 0.0) * 100.0
         else:
-            config.revenue_counter += order_vals.get('amount_total', 0.0)
+            config.revenue_counter += order_vals.get('amount_total', 0.0) * 100.0
 
         receipt_number = int(config.receipt_sequence_id.next_by_id())
 
